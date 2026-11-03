@@ -182,7 +182,7 @@ def nouveaux_scans_section():
         for item in comparisons
     )
     section = r"""
-\section{Six acquisitions supplémentaires : vérification sur la salle}
+\section{Six acquisitions supplémentaires : estimations exploratoires}
 Six nouveaux scans LD06, nommés N1 à N6 dans l'ordre des fichiers, ont été
 enregistrés dans plusieurs zones de la salle. N1, N2, N3, N5 et N6 ont été
 pris à une hauteur estimée entre 1,00 et 1,20 m par l'utilisateur ; cette
@@ -246,7 +246,8 @@ le désaccord entre méthodes signale une ambiguïté des structures observées.
 Le résidu propre à chaque représentation ne constitue pas une mesure terrain.
 \begin{figure}[H]\centering
 \includegraphics[width=\linewidth]{resultats_nouveaux_scans/comparaison_paire_selectionnee.png}
-\caption{Même paire et même départ de 180 degrés pour les trois méthodes.}
+\caption{Estimations des trois méthodes sur la même paire et depuis le même
+départ de 180 degrés ; aucune pose terrain indépendante n'est disponible.}
 \end{figure}
 
 Les déplacements et rotations réels entre ces acquisitions n'ont pas été
@@ -490,7 +491,7 @@ départs testés et dans une autre géométrie, le taux peut diminuer.
 \caption{Exemple des trois méthodes depuis le même départ.}
 \end{figure}
 
-\section{Résultats sur les acquisitions réelles}
+\section{Estimations sur les acquisitions réelles}
 Les trois références sont construites sur A\_01 et les cinq autres tours
 A/B servent de tests. Pour A\_02 et A\_03, une pose proche de l'origine
 est plausible si le capteur est effectivement resté immobile. Pour les
@@ -530,7 +531,7 @@ Un faible écart type peut se produire si le solveur reproduit toujours le
 même mauvais appariement ; il n'est pas une preuve de justesse.
 \begin{figure}[H]\centering
 \includegraphics[width=\linewidth]{localisation_reelle.png}
-\caption{A\_02 et B\_01 localisés sur A\_01.}
+\caption{Poses estimées de A\_02 et B\_01 dans le repère de A\_01.}
 \end{figure}
 
 @@NEWSCANS@@
