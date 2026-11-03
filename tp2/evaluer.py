@@ -1,5 +1,5 @@
 """Protocole commun : references construites sans les scans de test."""
-import csv,json,time
+import argparse,csv,json,time
 from pathlib import Path
 import numpy as np
 import matplotlib
@@ -32,28 +32,52 @@ def prepare(reference):
   start=time.perf_counter();prepared[name]=cls(reference);times[name]=time.perf_counter()-start
  return prepared,times
 
+
+def read_measured_poses(path):
+ """Independent robot measurements; blank rows intentionally mean unknown."""
+ measured={}
+ with path.open(encoding='utf-8-sig',newline='') as f:
+  for row in csv.DictReader(f,delimiter=';'):
+   label=row['scan'].strip()
+   fields=['x_m','y_m','angle_deg','uncertainty_position_m','uncertainty_angle_deg']
+   values=[row[key].strip().replace(',','.') for key in fields]
+   if not any(values):continue
+   if not all(values):raise ValueError(f'Mesure incomplete pour {label}: pose et incertitudes requises')
+   numbers=np.array([float(value) for value in values])
+   if not np.isfinite(numbers).all() or (numbers[3:]<0).any():raise ValueError(f'Mesure invalide pour {label}')
+   if label in measured:raise ValueError(f'Scan mesure deux fois: {label}')
+   measured[label]=dict(pose=numbers[:3].tolist(),uncertainty_position_m=float(numbers[3]),uncertainty_angle_deg=float(numbers[4]))
+ return measured
+
+
 def evaluate(dataset,reference,queries,offsets,truths=None):
  prepared,times=prepare(reference);rows=[];illustrations={}
  for qi,(label,query) in enumerate(queries.items()):
   # Identical angular subsampling supplied to every method.
   query=valid_scan(query)[::3]
-  center=np.zeros(3) if truths is None else np.array(truths[label],float)
+  truth=None if truths is None else truths.get(label)
+  center=np.array(truth,float) if dataset=='simulation' else np.zeros(3)
   for trial,offset in enumerate(offsets):
    initial=center+offset
    for name,(_,solver) in METHODS.items():
     start=time.perf_counter();pose,info=solver(query,prepared[name],initial);seconds=time.perf_counter()-start
-    if truths is not None:
-     pe=float(np.linalg.norm(pose[:2]-center[:2]));ae=abs(wrap(pose[2]-center[2]));success=pe<=POSITION_THRESHOLD and ae<=ANGLE_THRESHOLD
+    if truth is not None:
+     pe=float(np.linalg.norm(pose[:2]-truth[:2]));ae=abs(wrap(pose[2]-truth[2]));success=pe<=POSITION_THRESHOLD and ae<=ANGLE_THRESHOLD
     else:pe=ae=success=None
-    rows.append(dict(dataset=dataset,scan=label,trial=trial,method=name,initial_x=initial[0],initial_y=initial[1],initial_angle=initial[2],estimated_x=pose[0],estimated_y=pose[1],estimated_angle=pose[2],position_error_m=pe,angle_error_deg=ae,success=success,seconds=seconds,reference_build_seconds=times[name],residual_rms_capped_m=float(np.sqrt(info['score'])),points_tested=len(query)))
+    rows.append(dict(dataset=dataset,scan=label,trial=trial,method=name,initial_x=initial[0],initial_y=initial[1],initial_angle=initial[2],estimated_x=pose[0],estimated_y=pose[1],estimated_angle=pose[2],position_error_m=pe,angle_error_deg=ae,success=success,reference_uncertainty_position_m=None,reference_uncertainty_angle_deg=None,seconds=seconds,reference_build_seconds=times[name],residual_rms_capped_m=float(np.sqrt(info['score'])),points_tested=len(query)))
     if trial==0:illustrations[(label,name)]=(query,pose)
   print(dataset,label,'termine',flush=True)
  return rows,prepared,illustrations
 
 def main():
+ parser=argparse.ArgumentParser(description=__doc__)
+ parser.add_argument('--mesures',type=Path,default=ROOT/'references_mesurees.csv',help='Poses terrain et incertitudes mesurees independamment')
+ args=parser.parse_args()
  OUT.mkdir(exist_ok=True)
  shapes=scene();reference=raycast(shapes,[0,0,0],seed=11)
- truths={'simulation_B1':[.437,.127,4.3],'simulation_B2':[-.367,.283,-6.4]}
+ truths={'simulation_B1':[.437,.127,4.3],'simulation_B2':[-.367,.283,-6.4],
+         'simulation_B3':[1.1,-.7,12.], 'simulation_B4':[-.8,.95,-12.],
+         'simulation_B5':[.2,1.3,25.], 'simulation_B6':[1.5,1.,-22.]}
  queries={k:raycast(shapes,p,seed=20+i) for i,(k,p) in enumerate(truths.items())}
  np.savez_compressed(OUT/'simulation.npz',segments=shapes,reference=reference,**queries)
  rows,refs,illustrations=evaluate('simulation',reference,queries,OFFSETS,truths)
@@ -68,16 +92,34 @@ def main():
  adir=ROOT/'acquisitions/position_A_20261103_120212';bdir=ROOT/'acquisitions/position_B_20261103_120333'
  real_reference=valid_scan(load_scan(adir/'A_01.csv'))
  real_queries={p.stem:load_scan(p) for p in [adir/'A_02.csv',adir/'A_03.csv',bdir/'B_01.csv',bdir/'B_02.csv',bdir/'B_03.csv']}
- realrows,realrefs,realplots=evaluate('reel',real_reference,real_queries,OFFSETS[:5])
+ measurements=read_measured_poses(args.mesures)
+ unexpected=set(measurements)-set(real_queries)
+ if unexpected:raise ValueError(f'Mesures pour scans inconnus: {sorted(unexpected)}')
+ real_truths={label:entry['pose'] for label,entry in measurements.items()}
+ realrows,realrefs,realplots=evaluate('reel',real_reference,real_queries,OFFSETS[:5],real_truths)
+ for row in realrows:
+  measured=measurements.get(row['scan'])
+  if measured:
+   row['reference_uncertainty_position_m']=measured['uncertainty_position_m']
+   row['reference_uncertainty_angle_deg']=measured['uncertainty_angle_deg']
  realrefs['grid_multiresolution'].grid.export(OUT/'reference_grid_reelle')
  csv_save(OUT/'essais.csv',rows+realrows)
  summaries=[]
  for dataset,table in [('simulation',rows),('reel',realrows)]:
   for name in METHODS:
    selected=[r for r in table if r['method']==name]
-   summaries.append(dict(dataset=dataset,method=name,trials=len(selected),position_error_mean_m=float(np.mean([r['position_error_m'] for r in selected])) if dataset=='simulation' else None,angle_error_mean_deg=float(np.mean([r['angle_error_deg'] for r in selected])) if dataset=='simulation' else None,success_rate=float(np.mean([r['success'] for r in selected])) if dataset=='simulation' else None,median_seconds=float(np.median([r['seconds'] for r in selected])),mean_residual_rms_capped_m=float(np.mean([r['residual_rms_capped_m'] for r in selected]))))
+   known=[r for r in selected if r['position_error_m'] is not None]
+   summaries.append(dict(dataset=dataset,method=name,trials=len(selected),trials_with_ground_truth=len(known),position_error_mean_m=float(np.mean([r['position_error_m'] for r in known])) if known else None,angle_error_mean_deg=float(np.mean([r['angle_error_deg'] for r in known])) if known else None,success_rate=float(np.mean([r['success'] for r in known])) if known else None,median_seconds=float(np.median([r['seconds'] for r in selected])),mean_residual_rms_capped_m=float(np.mean([r['residual_rms_capped_m'] for r in selected]))))
  csv_save(OUT/'synthese.csv',summaries)
- report=dict(success_thresholds=dict(position_m=POSITION_THRESHOLD,angle_deg=ANGLE_THRESHOLD),simulation_poses=truths,initial_offsets=OFFSETS,random_seeds=[11,20,21],summary=summaries,real_ground_truth=dict(available=False,uncertainty_m=None,uncertainty_deg=None,note='Aucun deplacement ou angle mesure. Erreurs reelles et taux de reussite terrain non calculables.'),real_reference='A_01 uniquement',query_subsampling='1 point sur 3 apres filtre, identique pour chaque methode')
+ repeatability=[]
+ for method in METHODS:
+  for group in ['A','B']:
+   selected=[r for r in realrows if r['method']==method and r['trial']==0 and r['scan'].startswith(group+'_')]
+   poses=np.array([[r['estimated_x'],r['estimated_y'],r['estimated_angle']] for r in selected],float)
+   angles=np.rad2deg(np.unwrap(np.deg2rad(poses[:,2])))
+   repeatability.append(dict(method=method,position=group,scans=len(selected),mean_x_m=float(poses[:,0].mean()),mean_y_m=float(poses[:,1].mean()),mean_angle_deg=float(wrap(angles.mean())),std_x_m=float(poses[:,0].std(ddof=1)),std_y_m=float(poses[:,1].std(ddof=1)),std_angle_deg=float(angles.std(ddof=1))))
+ csv_save(OUT/'repetabilite_reelle.csv',repeatability)
+ report=dict(success_thresholds=dict(position_m=POSITION_THRESHOLD,angle_deg=ANGLE_THRESHOLD),simulation_poses=truths,initial_offsets=OFFSETS,random_seeds=[11,*range(20,20+len(truths))],summary=summaries,real_ground_truth=dict(available=bool(measurements),measurements=measurements,note='Poses terrain et incertitudes fournies independamment; lignes vides non evaluees.' if measurements else 'Aucun deplacement ou angle mesure. Erreurs reelles et taux de reussite terrain non calculables.'),real_reference='A_01 uniquement',query_subsampling='1 point sur 3 apres filtre, identique pour chaque methode',repeatability='Ecart type entre acquisitions distinctes depuis une meme position supposee; ne mesure pas la justesse physique.')
  (OUT/'protocole_et_resultats.json').write_text(json.dumps(report,indent=2),encoding='utf-8')
  fig,axes=plt.subplots(1,3,figsize=(15,4));names=list(METHODS)
  for ax,key,title in zip(axes,['position_error_m','angle_error_deg','seconds'],['Erreur position (m)','Erreur angulaire (degres)','Temps de calcul (s)']):
@@ -87,7 +129,7 @@ def main():
  for name in names:
   rates=[np.mean([r['success'] for r in rows if r['method']==name and r['trial']==t])*100 for t in range(len(OFFSETS))]
   ax.plot(range(len(OFFSETS)),rates,'o-',label=name)
- ax.set(xticks=range(len(OFFSETS)),xlabel='Initialisation (voir tableau offsets)',ylabel='Reussite (%)',ylim=(-5,105),title='Sensibilite a la pose initiale - deux scans simules par initialisation');ax.grid(alpha=.2);ax.legend();fig.tight_layout();fig.savefig(OUT/'sensibilite_initialisation.png',dpi=160);plt.close(fig)
+ ax.set(xticks=range(len(OFFSETS)),xlabel='Initialisation (voir tableau offsets)',ylabel='Reussite (%)',ylim=(-5,105),title=f'Sensibilite a la pose initiale - {len(truths)} scans simules par initialisation');ax.grid(alpha=.2);ax.legend();fig.tight_layout();fig.savefig(OUT/'sensibilite_initialisation.png',dpi=160);plt.close(fig)
  fig,axes=plt.subplots(1,3,figsize=(15,6))
  for ax,name in zip(axes,names):
   ax.scatter(*real_reference.T,s=7,c='gray',label='A_01 reference')
@@ -95,7 +137,7 @@ def main():
    query,pose=realplots[(label,name)];p=apply_pose(query,*pose);ax.scatter(*p.T,s=7,c=color,label=label)
   ax.set_aspect('equal');ax.grid(alpha=.2);ax.set_title(name);ax.legend(fontsize=8)
  fig.suptitle('Scans reels - initialisation commune (0,0,0) ; poses non mesurees');fig.tight_layout();fig.savefig(OUT/'localisation_reelle.png',dpi=160);plt.close(fig)
- assert len(rows)==60 and len(realrows)==75
+ assert len(rows)==len(truths)*len(OFFSETS)*len(METHODS) and len(realrows)==len(real_queries)*5*len(METHODS)
  print(json.dumps(summaries,indent=2),flush=True)
 
 if __name__=='__main__':main()

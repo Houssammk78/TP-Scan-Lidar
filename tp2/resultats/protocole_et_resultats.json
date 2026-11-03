@@ -13,6 +13,26 @@
       -0.367,
       0.283,
       -6.4
+    ],
+    "simulation_B3": [
+      1.1,
+      -0.7,
+      12.0
+    ],
+    "simulation_B4": [
+      -0.8,
+      0.95,
+      -12.0
+    ],
+    "simulation_B5": [
+      0.2,
+      1.3,
+      25.0
+    ],
+    "simulation_B6": [
+      1.5,
+      1.0,
+      -22.0
     ]
   },
   "initial_offsets": [
@@ -70,76 +90,86 @@
   "random_seeds": [
     11,
     20,
-    21
+    21,
+    22,
+    23,
+    24,
+    25
   ],
   "summary": [
     {
       "dataset": "simulation",
       "method": "grid_multiresolution",
-      "trials": 20,
-      "position_error_mean_m": 0.3002949855982371,
-      "angle_error_mean_deg": 15.0625,
-      "success_rate": 0.7,
-      "median_seconds": 0.07974379986990243,
-      "mean_residual_rms_capped_m": 0.14397211972097493
+      "trials": 60,
+      "trials_with_ground_truth": 60,
+      "position_error_mean_m": 0.014486171493517008,
+      "angle_error_mean_deg": 0.3,
+      "success_rate": 1.0,
+      "median_seconds": 0.07508844998665154,
+      "mean_residual_rms_capped_m": 0.09733679112347031
     },
     {
       "dataset": "simulation",
       "method": "vector_multiresolution",
-      "trials": 20,
-      "position_error_mean_m": 0.29436147120427086,
-      "angle_error_mean_deg": 14.975,
-      "success_rate": 0.7,
-      "median_seconds": 0.2500797000247985,
-      "mean_residual_rms_capped_m": 0.13945642435328293
+      "trials": 60,
+      "trials_with_ground_truth": 60,
+      "position_error_mean_m": 0.0073570226039552,
+      "angle_error_mean_deg": 0.375,
+      "success_rate": 1.0,
+      "median_seconds": 0.5486152499215677,
+      "mean_residual_rms_capped_m": 0.0950755958206833
     },
     {
       "dataset": "simulation",
-      "method": "scan_icp",
-      "trials": 20,
-      "position_error_mean_m": 0.216558057717349,
-      "angle_error_mean_deg": 13.113223019367974,
-      "success_rate": 0.8,
-      "median_seconds": 0.16135130007751286,
-      "mean_residual_rms_capped_m": 0.128124119157068
+      "method": "scan_coarse_icp",
+      "trials": 60,
+      "trials_with_ground_truth": 60,
+      "position_error_mean_m": 0.010690355937288513,
+      "angle_error_mean_deg": 0.375,
+      "success_rate": 1.0,
+      "median_seconds": 0.16553384996950626,
+      "mean_residual_rms_capped_m": 0.0946859159667131
     },
     {
       "dataset": "reel",
       "method": "grid_multiresolution",
       "trials": 25,
+      "trials_with_ground_truth": 0,
       "position_error_mean_m": null,
       "angle_error_mean_deg": null,
       "success_rate": null,
-      "median_seconds": 0.07906230003573,
-      "mean_residual_rms_capped_m": 0.05040250886345623
+      "median_seconds": 0.09688629978336394,
+      "mean_residual_rms_capped_m": 0.050279841084339465
     },
     {
       "dataset": "reel",
       "method": "vector_multiresolution",
       "trials": 25,
+      "trials_with_ground_truth": 0,
       "position_error_mean_m": null,
       "angle_error_mean_deg": null,
       "success_rate": null,
-      "median_seconds": 0.22092719981446862,
-      "mean_residual_rms_capped_m": 0.03316972506563856
+      "median_seconds": 0.7005489999428391,
+      "mean_residual_rms_capped_m": 0.03316972506563855
     },
     {
       "dataset": "reel",
-      "method": "scan_icp",
+      "method": "scan_coarse_icp",
       "trials": 25,
+      "trials_with_ground_truth": 0,
       "position_error_mean_m": null,
       "angle_error_mean_deg": null,
       "success_rate": null,
-      "median_seconds": 0.10598169988952577,
-      "mean_residual_rms_capped_m": 0.050510629579099596
+      "median_seconds": 0.17178079998120666,
+      "mean_residual_rms_capped_m": 0.041731616711265004
     }
   ],
   "real_ground_truth": {
     "available": false,
-    "uncertainty_m": null,
-    "uncertainty_deg": null,
+    "measurements": {},
     "note": "Aucun deplacement ou angle mesure. Erreurs reelles et taux de reussite terrain non calculables."
   },
   "real_reference": "A_01 uniquement",
-  "query_subsampling": "1 point sur 3 apres filtre, identique pour chaque methode"
+  "query_subsampling": "1 point sur 3 apres filtre, identique pour chaque methode",
+  "repeatability": "Ecart type entre acquisitions distinctes depuis une meme position supposee; ne mesure pas la justesse physique."
 }

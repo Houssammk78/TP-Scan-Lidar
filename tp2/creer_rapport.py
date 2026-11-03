@@ -1,21 +1,105 @@
-"""Rapport reproductible depuis les resultats effectivement calcules."""
-import json,csv
+"""Régénère le rapport depuis les résultats, sans chiffres figés dans le texte."""
+import csv
+import json
 from pathlib import Path
-root=Path(__file__).resolve().parent
-r=json.loads((root/'resultats/protocole_et_resultats.json').read_text())
-labels={'grid_multiresolution':'Grille multi-résolution','vector_multiresolution':'Segments multi-résolution','scan_icp':'ICP point-à-point'}
-num=lambda v,n=3:f'{v:.{n}f}'.replace('.',',')
-sim=[];real=[]
-for row in r['summary']:
- if row['dataset']=='simulation':sim.append(labels[row['method']]+' & '+num(row['position_error_mean_m'])+' & '+num(row['angle_error_mean_deg'],2)+' & '+num(row['median_seconds'])+' & '+num(row['success_rate']*100,0)+r'\,\% \\')
- else:real.append(labels[row['method']]+' & '+num(row['median_seconds'])+' & '+num(row['mean_residual_rms_capped_m'])+r' \\')
-offsets=[str(i)+' & '+num(p[0],2)+' & '+num(p[1],2)+' & '+num(p[2],0)+r' \\' for i,p in enumerate(r['initial_offsets'])]
-text=r'''\documentclass[11pt,a4paper]{article}
+
+ROOT = Path(__file__).resolve().parent
+OUT = ROOT / "resultats"
+data = json.loads((OUT / "protocole_et_resultats.json").read_text(encoding="utf-8"))
+
+
+def read_csv(name):
+    with (OUT / name).open(encoding="utf-8-sig", newline="") as file:
+        return list(csv.DictReader(file, delimiter=";"))
+
+
+def fmt(value, digits=2):
+    return "---" if value is None or value == "" else f"{float(value):.{digits}f}".replace(".", ",")
+
+
+def percent(value):
+    return "---" if value is None else f"{fmt(value * 100, 1)}\\,\\%"
+
+
+LABELS = {
+    "grid_multiresolution": "Grille",
+    "vector_multiresolution": "Segments",
+    "scan_coarse_icp": "Recherche + ICP",
+}
+summary = data["summary"]
+simulation = [item for item in summary if item["dataset"] == "simulation"]
+real = [item for item in summary if item["dataset"] == "reel"]
+trials = read_csv("essais.csv")
+repeatability = read_csv("repetabilite_reelle.csv")
+
+
+def table(lines):
+    return "\n".join(lines)
+
+
+poses = table(
+    f"{label.replace('_', ' ')} & {fmt(pose[0], 3)} & {fmt(pose[1], 3)} & {fmt(pose[2], 1)} \\\\"
+    for label, pose in data["simulation_poses"].items()
+)
+offsets = table(
+    f"{i} & {fmt(pose[0])} & {fmt(pose[1])} & {fmt(pose[2], 1)} \\\\"
+    for i, pose in enumerate(data["initial_offsets"])
+)
+sim_rows = table(
+    f"{LABELS[item['method']]} & {fmt(item['position_error_mean_m'], 3)} & "
+    f"{fmt(item['angle_error_mean_deg'], 2)} & {fmt(item['median_seconds'], 3)} & "
+    f"{percent(item['success_rate'])} \\\\"
+    for item in simulation
+)
+real_rows = table(
+    f"{LABELS[item['method']]} & {fmt(item['median_seconds'], 3)} & "
+    f"{fmt(item['mean_residual_rms_capped_m'], 3)} & "
+    f"{fmt(item['position_error_mean_m'], 3)} & "
+    f"{percent(item['success_rate'])} \\\\"
+    for item in real
+)
+b01_rows = table(
+    f"{LABELS[item['method']]} & {fmt(item['estimated_x'], 3)} & "
+    f"{fmt(item['estimated_y'], 3)} & {fmt(item['estimated_angle'], 2)} \\\\"
+    for item in trials if item["dataset"] == "reel" and item["scan"] == "B_01" and item["trial"] == "0"
+)
+repeat_rows = table(
+    f"{LABELS[item['method']]} & {item['position']} & {fmt(item['mean_x_m'], 3)} & "
+    f"{fmt(item['mean_y_m'], 3)} & {fmt(item['std_x_m'], 3)} & "
+    f"{fmt(item['std_y_m'], 3)} & {fmt(item['std_angle_deg'], 2)} \\\\"
+    for item in repeatability
+)
+
+ground_count = len(data["real_ground_truth"]["measurements"])
+measured_rows = data["real_ground_truth"]["measurements"]
+measurement_table = (
+    r"\begin{center}\small\begin{tabular}{lrrrrr}\toprule" "\n"
+    r"Scan & $x$ (m) & $y$ (m) & $\theta$ ($^\circ$) & $u_p$ (m) & $u_\theta$ ($^\circ$)\\" "\n"
+    r"\midrule" "\n"
+    + table(
+        f"{label.replace('_', ' ')} & {fmt(item['pose'][0], 3)} & {fmt(item['pose'][1], 3)} & "
+        f"{fmt(item['pose'][2], 2)} & {fmt(item['uncertainty_position_m'], 3)} & "
+        f"{fmt(item['uncertainty_angle_deg'], 2)} \\\\"
+        for label, item in measured_rows.items()
+    )
+    + "\n\\bottomrule\\end{tabular}\\end{center}"
+    if measured_rows else ""
+)
+ground_text = (
+    f"{ground_count} scan(s) ont une pose et des incertitudes mesurées indépendamment. "
+    "Seuls ces scans contribuent aux erreurs et aux taux de réussite réels."
+    if ground_count else
+    "Aucune pose terrain ni incertitude n'a été mesurée indépendamment. "
+    "Les erreurs de pose et les taux de réussite réels ne sont pas calculables."
+)
+
+report = r"""
+\documentclass[11pt,a4paper]{article}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage[french]{babel}
-\usepackage[margin=2.2cm]{geometry}
-\usepackage{amsmath,graphicx,booktabs,float,xcolor}
+\usepackage[margin=2.1cm]{geometry}
+\usepackage{amsmath,graphicx,booktabs,float}
 \usepackage[hidelinks]{hyperref}
 \graphicspath{{resultats/}}
 \hypersetup{pdfauthor={Houssam MAKHLOUK},pdftitle={TP2 - Localisation et Scan Matching}}
@@ -37,103 +121,182 @@ text=r'''\documentclass[11pt,a4paper]{article}
 \end{titlepage}
 \pagenumbering{roman}\hypersetup{pageanchor=true}
 \tableofcontents\clearpage\pagenumbering{arabic}
-\section{Objectif et périmètre}
-Le TP demande une méthode fonctionnelle pour chacun des trois supports : grille d'occupation, carte vectorielle et scan de référence. Les trois méthodes sont comparées sur les mêmes scans et avec les mêmes poses initiales. Les erreurs de position et d'angle, les temps de calcul et la sensibilité à l'initialisation sont mesurés en simulation. Sur les données réelles, l'absence de pose terrain mesurée interdit de calculer une erreur physique indépendante.
 
-\section{Données et séparation référence/test}
-\subsection{Acquisitions réelles}
-Six scans LD06 ont été enregistrés via USB/ESP32 sur COM3 à 115\,200 bauds : trois à la position A, puis trois à la position B. La hauteur annoncée à A est 1,90 m ; la même hauteur est supposée à B selon le protocole. Le déplacement effectif, l'orientation et leurs incertitudes n'ont pas été mesurés. L'absence de mouvement pendant chaque prise est une hypothèse de manipulation.
-\begin{center}\begin{tabular}{lrrr}\toprule Position & Scan 1 & Scan 2 & Scan 3 \\
-\midrule A & 457 & 519 & 451 \\ B & 457 & 456 & 456 \\
-\bottomrule\end{tabular}\end{center}
-Le nombre variable de points ne valide pas à lui seul un scan : les indices consécutifs et la couverture angulaire sont vérifiés à l'acquisition. Les données brutes restent disponibles. Les points non finis et ceux de portée hors de $[0{,}15;12]$ m sont écartés ; un point sur trois est ensuite retenu pour les essais, avec exactement le même nuage fourni aux trois solveurs.
+\section{Objectif et données}
+Le TP demande une méthode fonctionnelle par référence et une évaluation chiffrée
+sur les mêmes scans et poses initiales. Ici, un scan est localisé par rapport à
+une grille d'occupation, à une carte vectorielle et à un scan de référence.
 
-\textbf{A\_01 seul construit toutes les références réelles.} Les scans A\_02, A\_03 et B\_01 à B\_03 sont réservés aux tests. Les points du scan de test ne sont donc pas ajoutés à la carte utilisée pour les localiser. La référence est un scan complet ; les représentations grille et vectorielle en sont dérivées.
+\subsection{Acquisitions LD06}
+Trois scans ont été pris à la position A (457, 519 et 451 points), trois à B
+(457, 456 et 456 points). La hauteur annoncée à A est 1,90 m ; elle est
+supposée identique à B. La translation, la rotation, la stabilité du montage
+et leurs incertitudes n'ont pas été mesurées. A\_01 définit l'origine du repère
+et construit seul les trois références. A\_02, A\_03 et B\_01 à B\_03 sont
+réservés aux tests.
 
-\subsection{Simulation à poses connues}
-Un environnement asymétrique est défini par un contour à décrochement et deux obstacles rectangulaires. Un raycasting de 540 directions simule des scans indépendants aux poses de référence et de test. Un bruit gaussien de distance d'écart-type 8 mm est ajouté ; les graines 11, 20 et 21 rendent les données reproductibles.
-La référence est à $(0,0,0)$ ; les poses de test sont $(0{,}437;0{,}127;4{,}3^\circ)$ et $(-0{,}367;0{,}283;-6{,}4^\circ)$. Les surfaces visibles se recouvrent largement, sans être identiques : le raycasting conserve les occultations. Le décor est simple et ne représente pas toutes les difficultés d'une salle réelle.
+\subsection{Simulation à poses exactes}
+Une salle asymétrique à décrochement et deux obstacles rectangulaires sont
+simulés par lancer de 540 rayons. Les portées subissent un bruit gaussien
+indépendant de $\sigma=8$ mm. Les graines sont fixes. Le scan de référence
+est à $(0,0,0)$, et les @@NSIM@@ scans de test ont ces poses :
+\begin{center}\small
+\begin{tabular}{lrrr}\toprule Scan & $x^*$ (m) & $y^*$ (m) & $\theta^*$ ($^\circ$)\\
+\midrule
+@@POSES@@
+\bottomrule\end{tabular}
+\end{center}
+La vérité terrain sert seulement à fabriquer les départs et calculer les erreurs ;
+les solveurs ne la reçoivent pas. Les occultations changent avec la pose.
 
-\section{Méthodes de localisation}
-La pose recherchée est $q=(x,y,\theta)$, en mètres et degrés dans les fichiers. La transformation appliquée aux points est $p_g=R(\theta)p_l+[x,y]^T$. Le signe de $Y$ des CSV est conservé.
+\section{Méthodes}
+La pose $q=(x,y,\theta)$ transforme un impact local par
+$p_g=R(\theta)p_l+[x,y]^T$. Les mêmes points sont donnés aux trois solveurs :
+portée entre 0,15 et 12 m, puis un point sur trois.
 
-\subsection{Sur grille d'occupation}
-Une grille de 6 cm est construite depuis le scan de référence par la méthode du TP1. Pour chaque cellule, la distance au centre de la cellule occupée la plus proche est précalculée. Le score d'une pose repose sur les distances des impacts transformés aux obstacles. Un point hors carte reçoit une distance de 1 m avant plafonnement. Une cellule inconnue ne devient pas artificiellement libre ; le champ ne décrit que la distance géométrique aux obstacles connus. Ce score d'extrémités ne contrôle pas toute la cohérence des rayons traversés.
+\subsection{Grille d'occupation}
+A\_01 produit une grille ternaire de résolution 6 cm : libre sur le rayon,
+occupé au point d'impact, inconnu ailleurs. Un champ pré-calculé donne la
+distance au centre de la cellule occupée la plus proche. Hors carte, le résidu
+est 1 m avant plafonnement. Ce score ne vérifie pas les rayons libres du scan test.
 
-\subsection{Sur carte vectorielle}
-Des segments sont extraits du scan de référence : regroupement par continuité, split-and-fit et rejet des primitives trop petites. Les seuils employés sont 35 cm pour l'écart entre voisins, 4,5 cm pour l'erreur de droite, cinq points et 15 cm de longueur minimale. Pour un segment $[a,b]$, la distance utilise la projection bornée :
+\subsection{Carte vectorielle}
+A\_01 est regroupé par continuité et ajusté en segments. Seuils : 35 cm entre
+voisins, erreur de droite 4,5 cm, au moins cinq points et longueur de 15 cm.
+Pour chaque point et segment $[a,b]$, la distance est
 \[
- t=\operatorname{clip}\left(\frac{(p-a)\cdot(b-a)}{\|b-a\|^2},0,1\right),\qquad
- d(p,[a,b])=\|p-a-t(b-a)\|.
+d(p,[a,b])=\|p-a-t(b-a)\|,\quad
+t=\operatorname{clip}\left(\frac{(p-a)\cdot(b-a)}{\|b-a\|^2},0,1\right).
 \]
-Le minimum sur les segments de la carte définit le résidu d'un point.
+Le résidu est le minimum sur les segments de référence.
 
-\subsection{Recherche multi-résolution commune aux deux cartes}
-La fonction coût est $J(q)=\frac1N\sum_i\min(d(T_qp_i),0{,}6)^2$. Le plafonnement limite l'influence des points sans correspondance. Quatre niveaux explorent une grille locale en translation et orientation ; les trois meilleurs candidats sont conservés pour le niveau suivant.
-\begin{center}\begin{tabular}{lrr}\toprule Niveau & Pas spatial (m) & Pas angulaire ($^\circ$) \\
-\midrule 1 & 0,50 & 10 \\ 2 & 0,15 & 3 \\ 3 & 0,04 & 1 \\ 4 & 0,01 & 0,25 \\
-\bottomrule\end{tabular}\end{center}
-Chaque niveau teste $\pm2$ pas selon les trois dimensions. La plage théorique cumulée est donc $\pm1{,}40$ m et $\pm28{,}5^\circ$ autour du départ. Il s'agit d'une recherche locale hiérarchique, pas d'une localisation globale exhaustive de toute la salle. La résolution de la grille limite sa finesse effective.
+\subsection{Recherche hiérarchique}
+Sur les deux cartes, le coût est
+$J(q)=N^{-1}\sum_i\min(d(T_qp_i),0{,}6)^2$.
+Le premier niveau teste $\pm2{,}5$ m selon X et Y et $\pm100^\circ$
+autour de la pose initiale, par pas de 0,5 m et $10^\circ$. Son classement
+rapide utilise un tiers du nuage de test déjà sous-échantillonné. Les 120
+meilleurs candidats sont réévalués sur tous les points et huit hypothèses
+distinctes sont retenues. Trois niveaux les affinent dans un voisinage de
+$\pm2$ pas : $(0{,}15\,\mathrm m,3^\circ)$,
+$(0{,}04\,\mathrm m,1^\circ)$ et $(0{,}01\,\mathrm m,0{,}25^\circ)$.
+La portée théorique cumulée est $\pm2{,}90$ m et $\pm108{,}5^\circ$.
 
-\subsection{Entre scans : ICP}
-L'ICP point-à-point transforme le scan courant, recherche les voisins dans le scan de référence et ajuste une transformation rigide par SVD. Les 85\,\% de correspondances les plus proches sont conservées. La pose est composée avec l'incrément estimé. Le calcul s'arrête après 70 itérations au maximum, ou lorsque l'incrément est inférieur à $10^{-5}$ m et $10^{-4}$ degré. La convergence vers un minimum local ne garantit pas une pose correcte ; les symétries et l'initialisation restent déterminantes.
+\subsection{Localisation entre scans}
+La même recherche utilise les distances au plus proche point de A\_01. Elle
+initialise un ICP point-à-point. L'ICP garde les 85\,\% de paires les plus
+proches, ajuste une pose rigide par SVD et compose les poses (70 itérations
+au plus). La pose avant ou après ICP ayant le meilleur score est retenue.
+Le temps de ce solveur comprend recherche et ICP.
 
-\section{Protocole d'évaluation commun}
-L'erreur de position est $e_p=\|\hat t-t^*\|$ ; l'erreur angulaire est $e_\theta=|\operatorname{wrap}(\hat\theta-\theta^*)|$, avec wrap dans $[-180^\circ,180^\circ[$. Une réussite exige simultanément $e_p\leq0{,}20$ m et $e_\theta\leq5^\circ$.
-
-\begin{table}[H]\centering
-\begin{tabular}{rrrr}\toprule Indice & $\Delta x$ (m) & $\Delta y$ (m) & $\Delta\theta$ ($^\circ$) \\
+\section{Protocole}
+L'erreur est $e_p=\|\hat t-t^*\|$ en position et
+$e_\theta=|\operatorname{wrap}(\hat\theta-\theta^*)|$ en angle.
+La réussite exige $e_p\leq0{,}20$ m \emph{et} $e_\theta\leq5^\circ$.
+Les perturbations appliquées à chaque pose simulée sont :
+\begin{center}\small
+\begin{tabular}{rrrr}\toprule Essai & $\Delta x$ (m) & $\Delta y$ (m) & $\Delta\theta$ ($^\circ$)\\
 \midrule
 @@OFFSETS@@
 \bottomrule\end{tabular}
-\caption{Perturbations initiales. En simulation elles s'ajoutent aux poses exactes pour créer des cas contrôlés ; la vérité terrain n'est pas transmise aux solveurs. En réel, les cinq premières s'ajoutent à $(0,0,0)$.}
-\end{table}
-Deux scans simulés, dix initialisations et trois méthodes donnent 60 essais. Cinq scans réels, cinq initialisations et trois méthodes donnent 75 essais : \textbf{135 essais au total}. Les mêmes poses et points sont utilisés pour les trois méthodes dans chaque cas.
-Le temps de localisation est mesuré avec \texttt{perf\_counter}, hors création des références. Le temps de préparation est enregistré séparément dans le CSV détaillé. Les temps publiés proviennent d'une exécution sur le PC de travail ; il ne s'agit pas d'un banc de performance indépendant.
+\end{center}
+Les mêmes scans et départs sont fournis aux trois méthodes à chaque essai.
+En réel, les cinq premiers écarts partent de $(0,0,0)$.
+@@NSIM@@ scans simulés $\times10$ départs $\times3$ méthodes donnent
+@@SIMTRIALS@@ essais ; cinq scans réels $\times5\times3$ donnent
+@@REALTRIALS@@ essais. Les temps sont mesurés hors construction des références ;
+le temps de préparation figure séparément dans le CSV détaillé.
 
 \section{Résultats en simulation}
 \begin{table}[H]\centering\small
-\begin{tabular}{lrrrr}\toprule Méthode & $e_p$ moyen (m) & $e_\theta$ moyen ($^\circ$) & Temps médian (s) & Réussite \\
-\midrule
-@@SIM@@
+\begin{tabular}{lrrrr}\toprule Méthode & $e_p$ moyen (m) & $e_\theta$ moyen ($^\circ$) &
+Temps médian (s) & Réussite\\\midrule
+@@SIMTABLE@@
 \bottomrule\end{tabular}
-\caption{Vingt essais par méthode. Les erreurs moyennes incluent tous les échecs, y compris les grandes perturbations.}
+\caption{@@PERMETHOD@@ essais par méthode, échecs inclus.}
 \end{table}
-Les méthodes sur cartes réussissent 70\,\% des cas, l'ICP 80\,\%. Les sept initialisations proches réussissent sur ces deux scans ; les trois plus difficiles exposent les limites de la recherche et les minima locaux. La grille est la plus rapide sur ce jeu ; les segments demandent des projections sur plusieurs primitives pour chaque candidat. Ces résultats ne permettent pas de classer universellement les méthodes : ils dépendent des réglages, de l'environnement et du faible nombre de poses simulées.
-\begin{figure}[H]\centering\includegraphics[width=\linewidth]{comparaison_simulation.png}\caption{Distribution des erreurs et des temps sur les essais simulés, échecs inclus.}\end{figure}
-\begin{figure}[H]\centering\includegraphics[width=.9\linewidth]{sensibilite_initialisation.png}\caption{Sensibilité aux dix perturbations initiales. Chaque taux par point repose seulement sur deux scans, donc varie par pas de 50\,\%.}\end{figure}
-\begin{figure}[H]\centering\includegraphics[width=\linewidth]{simulation_localisation.png}\caption{Exemple de localisation des trois méthodes, au départ exact pour isoler la cohérence du modèle.}\end{figure}
+Ces taux proviennent d'un seul environnement simulé et ne garantissent pas
+la même performance dans une autre salle.
+\begin{figure}[H]\centering
+\includegraphics[width=\linewidth]{comparaison_simulation.png}
+\caption{Erreurs de position, d'orientation et temps, échecs inclus.}
+\end{figure}
+\begin{figure}[H]\centering
+\includegraphics[width=.94\linewidth]{sensibilite_initialisation.png}
+\caption{Réussite pour chaque perturbation, sur @@NSIM@@ scans.}
+\end{figure}
+\begin{figure}[H]\centering
+\includegraphics[width=\linewidth]{simulation_localisation.png}
+\caption{Exemple des trois méthodes depuis le même départ.}
+\end{figure}
 
 \section{Résultats sur les acquisitions réelles}
-\begin{table}[H]\centering
-\begin{tabular}{lrr}\toprule Méthode & Temps médian (s) & Résidu moyen plafonné (m) \\
-\midrule
-@@REAL@@
+\begin{table}[H]\centering\small
+\begin{tabular}{lrrrr}\toprule Méthode & Temps médian (s) & Résidu (m) &
+$e_p$ moyen (m) & Réussite\\\midrule
+@@REALTABLE@@
 \bottomrule\end{tabular}
-\caption{Vingt-cinq essais réels par méthode. Les résidus utilisent des références différentes et ne doivent pas être assimilés à des erreurs de pose comparables.}\end{table}
-Depuis la pose initiale $(0,0,0)$, les estimations pour B\_01 sont :
-\begin{center}\small\begin{tabular}{lrrr}\toprule M?thode & $x$ (m) & $y$ (m) & $\theta$ ($^\circ$) \\
-\midrule Grille & $-0{,}870$ & $-0{,}040$ & $-0{,}75$ \\
-Segments & $-0{,}890$ & $-0{,}040$ & $-1{,}00$ \\
-ICP & $-0{,}872$ & $-0{,}068$ & $-0{,}30$ \\
-\bottomrule\end{tabular}\end{center}
-Le d?placement estim? est proche de 0,9 m, et non une distance physique valid?e. Les autres scans et d?parts figurent dans le CSV complet.
-\begin{figure}[H]\centering\includegraphics[width=\linewidth]{localisation_reelle.png}\caption{Référence A\_01 et scans de test A\_02/B\_01 recalés depuis la même pose initiale nulle.}\end{figure}
-\textbf{Référence terrain : non mesurée. Incertitudes de position et d'angle : non disponibles.} Les erreurs métriques et les taux de réussite réels sont donc laissés non renseignés, et non remplacés par des zéros. Ni le résidu, ni l'accord de trois algorithmes, ni leur dispersion ne remplace l'incertitude d'une mesure indépendante. Pour satisfaire une évaluation métrique sur robot, il reste à relever les positions et orientations avec un moyen indépendant et à documenter sa précision.
+\caption{@@REALPERMETHOD@@ essais par méthode. --- signifie absence de vérité
+terrain. Les résidus des trois représentations ne sont pas directement comparables.}
+\end{table}
+@@GROUNDTEXT@@ Les mesures et leurs incertitudes peuvent être saisies dans
+\texttt{references\_mesurees.csv}, puis le même script recalcule les erreurs.
+@@MEASUREDTABLE@@
+Depuis le départ nul, les poses estimées de B\_01 sont :
+\begin{center}\small
+\begin{tabular}{lrrr}\toprule Méthode & $x$ (m) & $y$ (m) & $\theta$ ($^\circ$)\\
+\midrule
+@@B01TABLE@@
+\bottomrule\end{tabular}
+\end{center}
+Il s'agit d'estimations des algorithmes, pas de mesures physiques.
+La répétabilité entre acquisitions du même emplacement supposé est :
+\begin{center}\small
+\begin{tabular}{llrrrrr}\toprule
+Méthode & Position & $\bar x$ & $\bar y$ & $s_x$ & $s_y$ & $s_\theta$\\\midrule
+@@REPEATTABLE@@
+\bottomrule\end{tabular}
+\end{center}
+Moyennes et écarts types X/Y sont en mètres ; $s_\theta$ est en degrés.
+A contient deux scans de test et B en contient trois. Cette dispersion ne
+remplace pas l'incertitude d'une mesure terrain indépendante.
+\begin{figure}[H]\centering
+\includegraphics[width=\linewidth]{localisation_reelle.png}
+\caption{A\_02 et B\_01 localisés sur A\_01.}
+\end{figure}
 
-\section{Tests, reproduction et limites}
-Sept tests vérifient les angles, distances aux segments, pénalités hors carte, raycasting analytique, récupération d'une transformation connue par ICP, fonctionnement des deux solveurs sur cartes et rejet de scans invalides.
+\section{Vérification et limites}
+Les tests couvrent les distances, le raycasting, les poses connues, les grandes
+erreurs initiales et les références terrain partielles.
 \begin{verbatim}
 python tp2/evaluer.py
+python tp2/creer_rapport.py
 python -m unittest discover -s tp2 -p "test_*.py" -v
 \end{verbatim}
-Les exports comprennent les 135 essais détaillés, la synthèse, les paramètres, les poses simulées exactes, les grilles et les figures. Les graines sont fixes mais les temps fluctuent selon la machine. Le code dépend des modules du TP1 conservés dans \texttt{tp1/LD06\_Atelier}.
-Les limites principales sont le petit jeu simulé, le sous-échantillonnage, la portée locale de la recherche, les symétries, la discrétisation de la grille, les occultations et l'absence de référence terrain réelle. Les méthodes ne réalisent pas un SLAM ni une fermeture de boucle.
-
-\section{Conclusion}
-Une méthode fonctionnelle est fournie pour chacun des trois types de référence. Le protocole compare les mêmes scans et départs et mesure les erreurs, temps et taux de réussite en simulation. Les acquisitions réelles montrent une cohérence entre méthodes mais ne permettent pas de conclure sur la précision physique sans référence indépendante. La validation quantitative sur robot reste donc à compléter si elle est exigée, avec des mesures et incertitudes documentées.
+Les CSV, figures et paramètres sont dans \texttt{tp2/resultats}. Les temps
+dépendent de la machine. Le faible nombre de scènes simulées, les occultations,
+le sous-échantillonnage, la carte d'un seul tour et les symétries limitent
+les conclusions. Les trois types de référence sont implémentés et comparés.
+La validation métrique sur robot nécessite encore des poses et incertitudes
+relevées indépendamment des scans.
 \end{document}
-'''
-text=text.replace('@@OFFSETS@@','\n'.join(offsets)).replace('@@SIM@@','\n'.join(sim)).replace('@@REAL@@','\n'.join(real))
-(root/'rapport_tp2.tex').write_text(text,encoding='utf-8')
-print('Rapport TP2 genere depuis les resultats calcules.')
+"""
+
+for marker, value in {
+    "@@NSIM@@": str(len(data["simulation_poses"])),
+    "@@POSES@@": poses,
+    "@@OFFSETS@@": offsets,
+    "@@SIMTRIALS@@": str(sum(item["trials"] for item in simulation)),
+    "@@REALTRIALS@@": str(sum(item["trials"] for item in real)),
+    "@@PERMETHOD@@": str(simulation[0]["trials"]),
+    "@@REALPERMETHOD@@": str(real[0]["trials"]),
+    "@@SIMTABLE@@": sim_rows,
+    "@@REALTABLE@@": real_rows,
+    "@@GROUNDTEXT@@": ground_text,
+    "@@MEASUREDTABLE@@": measurement_table,
+    "@@B01TABLE@@": b01_rows,
+    "@@REPEATTABLE@@": repeat_rows,
+}.items():
+    report = report.replace(marker, value)
+(ROOT / "rapport_tp2.tex").write_text(report, encoding="utf-8")
+print("Rapport TP2 généré depuis les résultats calculés.")

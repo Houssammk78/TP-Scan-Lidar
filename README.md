@@ -14,11 +14,11 @@
 - [Rapport PDF](tp2/rapport_tp2.pdf) et [source LaTeX](tp2/rapport_tp2.tex).
 - [Guide et protocole](tp2/README.md).
 - [Six scans A/B](tp2/acquisitions).
-- [Resultats des 135 essais](tp2/resultats).
+- [Resultats des 255 essais](tp2/resultats).
 
 Une methode pour chacun des trois supports : grille, segments et scan de reference.
-En simulation : 70% de reussite sur grille et segments, 80% pour ICP, avec seuils
-20 cm et 5 degres sur le jeu de tests choisi. Les scans reels n'ont pas de poses
+En simulation : 60 essais par methode, tous reussis sur la scene simulee choisie,
+avec seuils de 20 cm et 5 degres. Les scans reels n'ont pas de poses
 terrain mesurees : leurs erreurs physiques et incertitudes ne sont pas inventees.
 
 ## Installation et tests
@@ -30,8 +30,9 @@ python -m pip install -r tp1/LD06_Atelier/requirements.txt
 python -m unittest discover -s tp1/LD06_Atelier -p "test_*.py" -v
 python -m unittest discover -s tp2 -p "test_*.py" -v
 python tp2/evaluer.py
+python tp2/creer_rapport.py
 ```
 
 Les lanceurs du TP1 se trouvent dans tp1/TP1_4_scans ; celui du TP2 dans tp2.
-21 tests TP1 et 7 tests TP2. Les chemins sont relatifs au depot pour permettre
+21 tests TP1 et 11 tests TP2. Les chemins sont relatifs au depot pour permettre
 le telechargement et la reproduction sur un autre poste.

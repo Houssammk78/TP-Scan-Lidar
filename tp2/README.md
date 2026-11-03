@@ -1,102 +1,86 @@
-# TP2 - Localisation / Scan matching
+# TP2 — Localisation par scan matching
 
-## Lancer
+Ce dossier couvre les trois références exigées : une grille d'occupation,
+une carte vectorielle et un autre scan. Les six acquisitions LD06 de A/B,
+les scripts, les essais chiffrés et le rapport sont conservés ici.
 
-Depuis la racine du projet :
+## Reproduire
 
+Depuis la racine du dépôt, avec Python et les dépendances du TP1 :
+
+    python -m pip install -r tp1/LD06_Atelier/requirements.txt
     python tp2/evaluer.py
+    python tp2/creer_rapport.py
     python -m unittest discover -s tp2 -p "test_*.py" -v
 
-Dependances : numpy et matplotlib, comme pour le TP1. Les modules du TP1 dans
-tp1/LD06_Atelier sont reutilises pour lire les CSV, construire les cartes et appliquer
-les poses. Aucun materiel branche n'est necessaire pour rejouer les essais.
+Le rapport PDF est dans [rapport_tp2.pdf](rapport_tp2.pdf) ; sa source LaTeX
+est [rapport_tp2.tex](rapport_tp2.tex). LaTeX n'est requis que pour
+recompiler le PDF après avoir régénéré le fichier .tex.
 
-Essai individuel :
+Pour un scan individuel :
 
-    python tp2/localiser.py --reference tp2/acquisitions/position_A_20261103_120212/A_01.csv --scan tp2/acquisitions/position_B_20261103_120333/B_01.csv --method scan_icp --initial 0 0 0 --output tp2/resultats/pose_B01.json
+    python tp2/localiser.py --reference tp2/acquisitions/position_A_20261103_120212/A_01.csv --scan tp2/acquisitions/position_B_20261103_120333/B_01.csv --method scan_coarse_icp --initial 0 0 0 --output tp2/resultats/pose_B01.json
 
-Autres choix : grid_multiresolution, vector_multiresolution.
-Unites des poses : X/Y en metres, orientation en degres.
-Les figures et CSV sont dans resultats/. Le rapport explique les choix en detail.
+Autres méthodes : grid_multiresolution et vector_multiresolution.
+X/Y sont en mètres et l'orientation en degrés.
 
-## Trois references et trois methodes
+## Références et méthodes
 
-- Grid map : reference construite a partir de A_01 seulement, cellules de 6 cm.
-  Champ des distances aux centres des cellules occupees, puis recherche multiresolution.
-- Carte vectorielle : extraction de segments de A_01 seulement, distance exacte
-  point-segment, puis la meme recherche multiresolution.
-- Entre scans : reference A_01, ICP point-a-point avec 85% des correspondances.
+Le scan A_01 seul construit les trois références. Les cinq autres scans sont
+des scans de test. En simulation, un scan de référence indépendant est
+généré à (0,0,0), puis six scans tests à des poses connues. Les mêmes points,
+le même filtrage et la même pose initiale servent aux trois méthodes pour
+chaque essai.
 
-A_02, A_03 et B_01..03 ne construisent pas la reference. En simulation, le scan de
-reference et les deux scans de test sont generes independamment par raycasting,
-avec poses exactes et bruit gaussien de distance (sigma 8 mm). L'environnement
-asymetrique comprend murs, decrochement et deux obstacles rectangulaires.
+- **Grille** : carte ternaire de 6 cm issue de A_01, champ des distances aux
+  cellules occupées, recherche hiérarchique de la pose.
+- **Segments** : carte vectorielle extraite de A_01, distance exacte entre
+  points et segments, même recherche.
+- **Entre scans** : recherche hiérarchique par distance au scan de référence,
+  puis ICP point-à-point. Le champ de distance interpolé accélère la recherche ;
+  l'ICP utilise les vrais points du scan.
 
-Les trois methodes recoivent les memes scans, le meme sous-echantillonnage (un point
-sur trois apres filtre) et les memes poses initiales. Plage de portee 0.15-12 m.
-References prepares une fois ; temps de preparation et de recherche distingues.
-Le nombre de points de reference et la representation sont propres a chaque methode.
+La recherche couvre initialement ±2,5 m selon X et Y et ±100° autour du
+départ. Les 120 meilleurs candidats sont réévalués avec tous les points,
+et huit hypothèses distinctes sont affinées à trois résolutions plus fines.
+La portée théorique finale est ±2,90 m et ±108,5°. La fonction coût est la
+moyenne des distances au carré plafonnées à 0,6 m. Le capteur est filtré à
+0,15–12 m ; un point sur trois est retenu pour les essais.
 
-## Protocole chiffre
+## Évaluation
 
-Simulation : 2 poses de test x 10 perturbations initiales x 3 methodes = 60 essais.
-Scans reels : 5 scans de test x 5 perturbations initiales x 3 methodes = 75 essais.
-Total 135 essais. Graines fixes 11,20,21 pour reproduire les donnees simulees.
+La simulation teste six scans × dix perturbations initiales × trois méthodes.
+Le réel teste cinq scans × cinq perturbations × trois méthodes.
+L'erreur de position et l'erreur d'orientation sont calculées seulement
+lorsqu'une pose de référence indépendante est connue. Les seuils de réussite
+sont 0,20 m **et** 5°. Les temps de préparation des références et ceux des
+solveurs sont séparés dans le CSV.
 
-Les erreurs initiales simulees sont ajoutees aux poses exactes uniquement pour
-construire des cas de test controles. Les solveurs ne recoivent pas la pose exacte.
-En reel, les poses initiales sont les memes decalages autour de (0,0,0).
-Les cartes sont construites a partir d'un scan et ne couvrent que les surfaces
-visibles depuis celui-ci. Les essais voisins voient largement ces memes surfaces,
-mais certains obstacles restent occultes.
+Les acquisitions réelles n'ont pas de déplacement, angle et incertitude
+mesurés indépendamment. Les colonnes d'erreur et de réussite réelles restent
+vides ; un faible résidu ou un accord entre méthodes ne prouve pas la justesse
+physique. Le fichier [references_mesurees.csv](references_mesurees.csv)
+permet de compléter ces mesures. Pour chaque scan de test, saisir la pose
+relative à A_01 et les deux incertitudes :
 
-Reussite : erreur de position <=0.20 m ET erreur angulaire <=5 degres.
-Angle ramene a [-180,180[. Temps mesure par perf_counter, hors preparation.
-Les statistiques incluent tous les essais, y compris les echecs difficiles.
-Le taux de reussite repose sur un petit ensemble synthetique (20 essais par methode),
-pas sur une certification generalisable a toutes les salles.
+    scan;x_m;y_m;angle_deg;uncertainty_position_m;uncertainty_angle_deg
+    B_01;-0,90;0,00;0,00;0,05;2,00
 
-Multiresolution : pas successifs (0.5 m,10 deg), (0.15 m,3 deg), (0.04 m,1 deg),
-(0.01 m,0.25 deg), recherche +/-2 pas a chaque niveau ; trois meilleurs candidats
-conserves pour raffinement. Plage maximale theorique : +/-1.4 m et +/-28.5 deg
-par rapport au depart ; les perturbations plus grandes sont volontairement difficiles.
-Score : moyenne des distances au carre plafonnees a 0.6 m (limite les outliers).
-Grille hors carte : distance 1 m, plafonnee dans le score ; aucune extrapolation.
-La discretisation du champ impose un plancher de precision a la methode grille.
-ICP : maximum 70 iterations, sous-ensemble de 85% des correspondances, seuils
-1e-5 m et 1e-4 deg sur l'increment. Sensible aux minima locaux et aux symetries.
+Cette ligne n'est qu'un **exemple de format**, pas une mesure du projet.
+Les champs vides sont ignorés. Une ligne partiellement remplie est rejetée.
+Après mesures, relancer la commande :
 
-## Resultats
+    python tp2/evaluer.py --mesures tp2/references_mesurees.csv
 
-La synthese CSV et le JSON stockent les valeurs calculees, pas des objectifs annonces.
-Sur ce jeu : 70% de reussite pour grille/segments et 80% pour ICP en simulation.
-Les initialisations proches reussissent ; les grandes erreurs peuvent sortir du
-bassin de convergence. Les moyennes d'erreur incluent ces echecs.
+Puis régénérer le rapport.
 
-Reel : les methodes donnent pour B_01 depuis (0,0,0) des translations proches de
--0.9 m en X dans le repere de A_01, mais ni distance ni rotation n'ont ete mesurees.
-Les fichiers indiquent donc NULL pour erreurs et taux de reussite reels, et pour
-l'incertitude de la reference terrain. La dispersion algorithmique ou le residu
-ne remplace pas une incertitude de mesure physique. Aucun taux de reussite reel
-n'est invente. Hauteur A : 190 cm annoncee ; B : meme hauteur supposee selon protocole.
-L'incertitude de hauteur et l'immobilite ne sont pas mesurees.
+Le fichier resultats/essais.csv contient chaque départ, pose finale, erreur
+éventuelle, score et temps. resultats/synthese.csv résume par méthode.
+resultats/repetabilite_reelle.csv mesure la dispersion entre acquisitions
+de A et de B depuis le départ nul ; ce n'est pas une incertitude terrain.
+Chaque CSV a aussi une version _Excel_FR.csv à séparateur point-virgule
+et virgule décimale.
 
-## Lecture des exports
-
-- essais.csv : toutes les poses initiales/finales, erreurs, scores et temps.
-- synthese.csv : comparaison des trois methodes, simulation et reel separes.
-- protocole_et_resultats.json : seuils, perturbations, poses exactes et limites.
-- comparaison_simulation.png : distributions des erreurs et temps.
-- sensibilite_initialisation.png : taux de reussite par perturbation (2 cas seulement).
-- simulation_localisation.png : exemple des trois alignements simules.
-- localisation_reelle.png : alignements A_02 et B_01 sur A_01, depart (0,0,0).
-- reference_grid_*.npz/.csv/.json : cartes d'occupation utilisees.
-- reference_segments_simulation.csv : segments de reference simules.
-
-## Pour terminer l'evaluation sur robot
-
-Les fonctions et les evaluations en simulation sont fournies. Il reste necessaire
-pour une evaluation metrique sur robot de mesurer independamment les poses et de
-documenter l'incertitude (distance, angle, montage). Une estimation ICP utilisee
-comme verite terrain rendrait la comparaison circulaire. L'etudiant devra expliquer
-cette limitation dans son rendu et, si exige par l'enseignant, completer l'acquisition.
+Les cartes, les figures et le protocole JSON sont dans resultats/.
+Les temps varient avec la machine et la simulation utilise un seul type de
+pièce. Les cartes réelles ne contiennent que ce que A_01 a observé.
