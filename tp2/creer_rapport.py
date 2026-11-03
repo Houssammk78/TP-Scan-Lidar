@@ -295,7 +295,7 @@ report = r"""
 \begin{document}
 \hypersetup{pageanchor=false}
 \begin{titlepage}\centering
-\vspace*{1cm}{\Large\bfseries EIGSI LA ROCHELLE\par}
+\vspace*{1cm}{\Large\bfseries EIGSI\par}
 \vspace{.4cm}{\large Année universitaire 2026/2027\par}
 \vspace{2cm}{\large RAPPORT DE TRAVAUX PRATIQUES\par}
 \vspace{.8cm}\rule{.9\textwidth}{1pt}\par\vspace{.6cm}
@@ -305,7 +305,7 @@ report = r"""
 \vspace{.6cm}\rule{.9\textwidth}{1pt}
 \vfill{\large Réalisé par\par}\vspace{.3cm}
 {\LARGE\bfseries Houssam MAKHLOUK\par}
-\vspace{.4cm}{\large Étudiant à EIGSI La Rochelle\par}
+\vspace{.4cm}{\large Étudiant à EIGSI\par}
 \vfill{\large 3 novembre 2026\par}
 \end{titlepage}
 \pagenumbering{roman}\hypersetup{pageanchor=true}
