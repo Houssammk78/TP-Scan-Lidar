@@ -27,7 +27,8 @@ dans l'historique Git. Aucun force-push n'est utilise.
 sous 20 cm), le scan 1 partiellement (72%), le scan 2 moins bien (37%). La hauteur declaree par l'utilisateur est de 1,90 m pour les quatre scans.
 Les cartes fusionnees restent des estimations, pas un plan de la salle valide.
 
-Rapport : [source LaTeX](rapport_tp1.tex), avec figures et resultats chiffres.
+Rapport : [PDF](rapport_tp1.pdf), avec figures et resultats chiffres.
+[Source LaTeX](rapport_tp1.tex).
 
-[Archive LaTeX avec les six figures pour Overleaf](rapport_TP1_LaTeX.zip).
-Compilation PDF non executee localement (aucun compilateur installe).
+
+
