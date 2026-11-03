@@ -1,0 +1,22 @@
+{
+  "method": "scan_icp",
+  "reference": "tp2/acquisitions/position_A_20261103_120212/A_01.csv",
+  "scan": "tp2/acquisitions/position_B_20261103_120333/B_01.csv",
+  "initial": [
+    0,
+    0,
+    0
+  ],
+  "pose_xy_m_angle_deg": [
+    -0.8717453628123135,
+    -0.06846012132459499,
+    -0.29830248036347484
+  ],
+  "build_seconds": 6.949994713068008e-05,
+  "solve_seconds": 0.10110019985586405,
+  "diagnostics": {
+    "score": 0.0026200000082907855,
+    "iterations": 21
+  },
+  "ground_truth": null
+}

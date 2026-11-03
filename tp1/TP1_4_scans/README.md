@@ -16,7 +16,7 @@ La hauteur de 1,90 m pour les quatre scans a ete declaree par l'utilisateur lors
 
 ## Installation et lancement
 
-Depuis la racine du depot :
+Depuis le dossier tp1 du depot :
 
     python -m pip install -r LD06_Atelier/requirements.txt
 

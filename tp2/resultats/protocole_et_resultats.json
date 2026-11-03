@@ -1,0 +1,145 @@
+{
+  "success_thresholds": {
+    "position_m": 0.2,
+    "angle_deg": 5.0
+  },
+  "simulation_poses": {
+    "simulation_B1": [
+      0.437,
+      0.127,
+      4.3
+    ],
+    "simulation_B2": [
+      -0.367,
+      0.283,
+      -6.4
+    ]
+  },
+  "initial_offsets": [
+    [
+      0,
+      0,
+      0
+    ],
+    [
+      0.25,
+      0,
+      5
+    ],
+    [
+      -0.25,
+      0.15,
+      -5
+    ],
+    [
+      0.5,
+      -0.25,
+      10
+    ],
+    [
+      -0.5,
+      0.3,
+      -10
+    ],
+    [
+      0.9,
+      0.5,
+      20
+    ],
+    [
+      -0.9,
+      -0.5,
+      -20
+    ],
+    [
+      1.6,
+      -1.1,
+      35
+    ],
+    [
+      -2,
+      1.4,
+      -45
+    ],
+    [
+      0,
+      0,
+      90
+    ]
+  ],
+  "random_seeds": [
+    11,
+    20,
+    21
+  ],
+  "summary": [
+    {
+      "dataset": "simulation",
+      "method": "grid_multiresolution",
+      "trials": 20,
+      "position_error_mean_m": 0.3002949855982371,
+      "angle_error_mean_deg": 15.0625,
+      "success_rate": 0.7,
+      "median_seconds": 0.07974379986990243,
+      "mean_residual_rms_capped_m": 0.14397211972097493
+    },
+    {
+      "dataset": "simulation",
+      "method": "vector_multiresolution",
+      "trials": 20,
+      "position_error_mean_m": 0.29436147120427086,
+      "angle_error_mean_deg": 14.975,
+      "success_rate": 0.7,
+      "median_seconds": 0.2500797000247985,
+      "mean_residual_rms_capped_m": 0.13945642435328293
+    },
+    {
+      "dataset": "simulation",
+      "method": "scan_icp",
+      "trials": 20,
+      "position_error_mean_m": 0.216558057717349,
+      "angle_error_mean_deg": 13.113223019367974,
+      "success_rate": 0.8,
+      "median_seconds": 0.16135130007751286,
+      "mean_residual_rms_capped_m": 0.128124119157068
+    },
+    {
+      "dataset": "reel",
+      "method": "grid_multiresolution",
+      "trials": 25,
+      "position_error_mean_m": null,
+      "angle_error_mean_deg": null,
+      "success_rate": null,
+      "median_seconds": 0.07906230003573,
+      "mean_residual_rms_capped_m": 0.05040250886345623
+    },
+    {
+      "dataset": "reel",
+      "method": "vector_multiresolution",
+      "trials": 25,
+      "position_error_mean_m": null,
+      "angle_error_mean_deg": null,
+      "success_rate": null,
+      "median_seconds": 0.22092719981446862,
+      "mean_residual_rms_capped_m": 0.03316972506563856
+    },
+    {
+      "dataset": "reel",
+      "method": "scan_icp",
+      "trials": 25,
+      "position_error_mean_m": null,
+      "angle_error_mean_deg": null,
+      "success_rate": null,
+      "median_seconds": 0.10598169988952577,
+      "mean_residual_rms_capped_m": 0.050510629579099596
+    }
+  ],
+  "real_ground_truth": {
+    "available": false,
+    "uncertainty_m": null,
+    "uncertainty_deg": null,
+    "note": "Aucun deplacement ou angle mesure. Erreurs reelles et taux de reussite terrain non calculables."
+  },
+  "real_reference": "A_01 uniquement",
+  "query_subsampling": "1 point sur 3 apres filtre, identique pour chaque methode"
+}

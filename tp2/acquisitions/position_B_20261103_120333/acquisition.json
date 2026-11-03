@@ -1,0 +1,23 @@
+{
+  "position": "B",
+  "height_cm": 190,
+  "height_source": "Meme hauteur supposee selon protocole A/B",
+  "captured_at": "2026-11-03T12:03:33.611121+01:00",
+  "port": "COM3",
+  "baud": 115200,
+  "files": [
+    "B_01.csv",
+    "B_02.csv",
+    "B_03.csv"
+  ],
+  "point_counts": [
+    457,
+    456,
+    456
+  ],
+  "complete_regular_tours_detected": 6,
+  "pose_reference_measured": false,
+  "displacement_measured_m": null,
+  "orientation_change_measured_deg": null,
+  "note": "Trois tours consecutifs durant une meme session. Immobilite supposee selon protocole. Le deplacement sera estime par recalage ; il ne constitue pas une reference terrain mesuree."
+}

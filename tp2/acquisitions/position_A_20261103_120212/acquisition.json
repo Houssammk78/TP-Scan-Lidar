@@ -1,0 +1,21 @@
+{
+  "position": "A",
+  "height_cm": 190,
+  "height_source": "Annonce utilisateur",
+  "captured_at": "2026-11-03T12:02:12.149454+01:00",
+  "port": "COM3",
+  "baud": 115200,
+  "files": [
+    "A_01.csv",
+    "A_02.csv",
+    "A_03.csv"
+  ],
+  "point_counts": [
+    457,
+    519,
+    451
+  ],
+  "complete_regular_tours_detected": 6,
+  "pose_reference_measured": false,
+  "note": "Trois tours consecutifs durant une meme session. Capteur suppose immobile selon protocole ; aucun deplacement terrain mesure."
+}

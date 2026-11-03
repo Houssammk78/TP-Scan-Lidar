@@ -1,34 +1,37 @@
-# TP Scan LiDAR - TP1 avec quatre scans
+# Travaux pratiques LiDAR - EIGSI La Rochelle
 
-Version actuelle : **quatre scans, 1821 mesures**, cartes individuelles et fusion.
+**Houssam MAKHLOUK - Annee universitaire 2026/2027**
 
-- [Guide complet et limites](TP1_4_scans/README.md)
-- [Fusion des quatre scans](TP1_4_scans/resultats/fusion_4_scans.png)
-- [Carte vectorielle](TP1_4_scans/resultats/carte_vectorielle.png)
-- [Carte occupation](TP1_4_scans/resultats/grid_map_finale.png)
-- [Progression de la grille](TP1_4_scans/resultats/grid_map_progression.png)
-- [Scans sources](TP1_4_scans/data)
-- [Resultats CSV et metadonnees](TP1_4_scans/resultats)
+## TP1 : extraction, visualisation et cartographie
 
-Installer Python 3 (avec Tk pour les fenetres), puis :
+- [Rapport PDF](tp1/rapport_tp1.pdf) et [source LaTeX](tp1/rapport_tp1.tex).
+- [Guide du TP1](tp1/README.md).
+- [Donnees et cartes des quatre scans](tp1/TP1_4_scans).
+- [Code et tests](tp1/LD06_Atelier).
 
-    python -m pip install -r LD06_Atelier/requirements.txt
+## TP2 : localisation et scan matching
 
-Ouvrir les lanceurs dans TP1_4_scans pour visualiser les quatre scans, la carte
-vectorielle ou la grille, et modifier independamment les poses.
+- [Rapport PDF](tp2/rapport_tp2.pdf) et [source LaTeX](tp2/rapport_tp2.tex).
+- [Guide et protocole](tp2/README.md).
+- [Six scans A/B](tp2/acquisitions).
+- [Resultats des 135 essais](tp2/resultats).
 
-    python TP1_4_scans/generer.py
-    python -m unittest discover -s LD06_Atelier -p "test_*.py" -v
+Une methode pour chacun des trois supports : grille, segments et scan de reference.
+En simulation : 70% de reussite sur grille et segments, 80% pour ICP, avec seuils
+20 cm et 5 degres sur le jeu de tests choisi. Les scans reels n'ont pas de poses
+terrain mesurees : leurs erreurs physiques et incertitudes ne sont pas inventees.
 
-Le rendu remplace les anciennes cartes a deux scans. Les anciens resultats restent
-dans l'historique Git. Aucun force-push n'est utilise.
+## Installation et tests
 
-**Qualite** : le scan 4 s'aligne tres bien sur le scan 3 (environ 99% de voisins
-sous 20 cm), le scan 1 partiellement (72%), le scan 2 moins bien (37%). La hauteur declaree par l'utilisateur est de 1,90 m pour les quatre scans.
-Les cartes fusionnees restent des estimations, pas un plan de la salle valide.
+Depuis la racine du depot :
 
-Rapport : [PDF](rapport_tp1.pdf), avec figures et resultats chiffres.
-[Source LaTeX](rapport_tp1.tex).
+```powershell
+python -m pip install -r tp1/LD06_Atelier/requirements.txt
+python -m unittest discover -s tp1/LD06_Atelier -p "test_*.py" -v
+python -m unittest discover -s tp2 -p "test_*.py" -v
+python tp2/evaluer.py
+```
 
-
-
+Les lanceurs du TP1 se trouvent dans tp1/TP1_4_scans ; celui du TP2 dans tp2.
+21 tests TP1 et 7 tests TP2. Les chemins sont relatifs au depot pour permettre
+le telechargement et la reproduction sur un autre poste.
