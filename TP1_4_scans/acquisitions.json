@@ -1,0 +1,12 @@
+{
+  "height_cm": 190,
+  "source": "Declaration utilisateur pour les quatre scans lors de la preparation du rapport",
+  "measured_by_lidar": false,
+  "scan_files": [
+    "scan1.csv",
+    "scan2.csv",
+    "scan3.csv",
+    "scan4.csv"
+  ],
+  "note": "Les poses restent estimees ; aucune incertitude de hauteur chiffree fournie."
+}

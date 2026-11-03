@@ -1,4 +1,4 @@
-﻿# TP Scan LiDAR - TP1 avec quatre scans
+# TP Scan LiDAR - TP1 avec quatre scans
 
 Version actuelle : **quatre scans, 1821 mesures**, cartes individuelles et fusion.
 
@@ -24,6 +24,10 @@ Le rendu remplace les anciennes cartes a deux scans. Les anciens resultats reste
 dans l'historique Git. Aucun force-push n'est utilise.
 
 **Qualite** : le scan 4 s'aligne tres bien sur le scan 3 (environ 99% de voisins
-sous 20 cm), le scan 1 partiellement (72%), le scan 2 moins bien (37%). Les hauteurs
-des scans 1 et 2 sont inconnues ; celle du scan 4 est supposee egale a 1,90 m.
+sous 20 cm), le scan 1 partiellement (72%), le scan 2 moins bien (37%). La hauteur declaree par l'utilisateur est de 1,90 m pour les quatre scans.
 Les cartes fusionnees restent des estimations, pas un plan de la salle valide.
+
+Rapport : [source LaTeX](rapport_tp1.tex), avec figures et resultats chiffres.
+
+[Archive LaTeX avec les six figures pour Overleaf](rapport_TP1_LaTeX.zip).
+Compilation PDF non executee localement (aucun compilateur installe).

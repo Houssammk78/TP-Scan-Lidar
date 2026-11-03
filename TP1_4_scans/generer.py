@@ -66,7 +66,7 @@ def main():
  figv.tight_layout();figv.savefig(OUT/'vectorielles_individuelles.png',dpi=150);plt.close(figv)
  vector.export(OUT/'carte_vectorielle.csv')
  fig,ax=plt.subplots(figsize=(12,11));draw_vectors(ax,allpoints,vector,'Carte vectorielle - fusion de quatre scans',poses)
- fig.text(.5,.015,'Poses estimees. Hauteur des scans 1 et 2 inconnue ; scan 3 : 1,90 m ; scan 4 : hauteur a confirmer.',ha='center',fontsize=9)
+ fig.text(.5,.015,'Poses estimees. Hauteur declaree par utilisateur : 1,90 m pour les quatre scans.',ha='center',fontsize=9)
  fig.tight_layout(rect=[0,.035,1,1]);fig.savefig(OUT/'carte_vectorielle.png',dpi=170);plt.close(fig)
  grid=build_grid(clouds,poses,.05);grid.export(OUT/'grid_map')
  fig,ax=plt.subplots(figsize=(12,11));draw_grid(ax,grid,'Carte occupation - quatre scans, cellules 5 cm',poses);fig.tight_layout();fig.savefig(OUT/'grid_map_finale.png',dpi=170);plt.close(fig)

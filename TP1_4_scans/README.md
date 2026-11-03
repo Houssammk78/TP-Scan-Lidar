@@ -1,18 +1,18 @@
-﻿# TP1 - quatre scans LD06
+# TP1 - quatre scans LD06
 
 ## Donnees
 
 | Scan | Origine | Points | Hauteur |
 |---|---|---:|---|
-| 1 | scan_20261102_170811_045727.csv | 454 | inconnue |
-| 2 | scan_20261102_170911_554109.csv | 454 | inconnue |
+| 1 | scan_20261102_170811_045727.csv | 454 | 1,90 m declaree |
+| 2 | scan_20261102_170911_554109.csv | 454 | 1,90 m declaree |
 | 3 | acquisition COM3 du 03/11/2026, 11:13 | 456 | 1,90 m annoncee |
-| 4 | acquisition COM3 du 03/11/2026, 11:15 | 457 | 1,90 m supposee, a confirmer |
+| 4 | acquisition COM3 du 03/11/2026, 11:15 | 457 | 1,90 m declaree |
 
 Les quatre CSV sources sont dans data/ et restent inchanges par les outils.
 Nouvelles acquisitions via ESP32 : port COM3, 115200 bauds, sortie CSV du firmware.
 Selection d'un tour par indices consecutifs et couverture angulaire >=350 degres.
-La procedure exacte et la hauteur des deux anciens scans restent a confirmer.
+La hauteur de 1,90 m pour les quatre scans a ete declaree par l'utilisateur lors de la preparation du rapport. Elle n'est pas mesuree par le LD06.
 
 ## Installation et lancement
 
@@ -65,7 +65,7 @@ translation d'environ 4 cm par rapport au scan 3 : il semble apporter surtout
 une nouvelle orientation plutot qu'un grand deplacement. A confirmer sur le terrain.
 La rotation libre a ete retenue car l'hypothese d'orientation identique donnait
 une mauvaise superposition. Les dimensions globales ne sont pas validees au metre.
-Le scan 2, les hauteurs inconnues et les occultations empechent de garantir un
+Le scan 2, les incertitudes de pose et les occultations empechent de garantir un
 alignement correct de tous les obstacles interieurs. Des murs communs coexistent
 avec des objets visibles a des hauteurs differentes : ne pas les confondre.
 
@@ -79,8 +79,8 @@ la grille fusionnee est une demonstration, pas une garantie d'espace navigable
 pour un robot. Les grilles individuelles restent disponibles pour comparaison.
 
 Vectorielle : groupes par proximite, split-and-fit, fusion selon orientation,
-distance aux droites et ecart des extremites. Sur ce lot, pas d'effacement des
-anciens segments par les rayons des autres scans : on ignore leur meme hauteur.
+distance aux droites et ecart des extremites. Sur ce lot, consolidation sans effacement des anciens segments par les rayons :
+choix conservateur face aux incertitudes de pose et changements de scene.
 Le viewer utilise --keep-vector-features pour reproduire ce choix.
 La mise a jour avec effacement reste disponible dans le mode normal du viewer
 et dans VectorMap.update ; elle est testee pour le TP.
