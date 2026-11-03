@@ -17,14 +17,17 @@ from matplotlib.colors import ListedColormap, BoundaryNorm
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("scans", nargs="*", type=Path, default=[Path(__file__).parent.parent / "scan_20261102_170811_045727.csv", Path(__file__).parent.parent / "scan_20261102_170911_554109.csv"])
+    dataset=Path(__file__).resolve().parent.parent / "TP1_4_scans"
+    defaults=[dataset / "data" / f"scan{i}.csv" for i in range(1,5)]
+    parser.add_argument("scans", nargs="*", type=Path, default=defaults)
     parser.add_argument("--grid-map", action="store_true", help="Afficher la grille occupation")
     parser.add_argument("--resolution", type=float, default=0.05, help="Taille cellule en metres")
     parser.add_argument("--export-grid", type=Path, default=Path(__file__).parent / "grid_map")
+    parser.add_argument("--keep-vector-features", action="store_true", help="Consolider sans effacer par rayons (hauteurs differentes)")
     parser.add_argument("--vector-map", action="store_true", help="Construire une carte de segments")
     parser.add_argument("--export-vectors", type=Path, default=Path(__file__).parent / "carte_vectorielle.csv")
     parser.add_argument("--multicolor", action="store_true", help="Colorer selon la distance")
-    parser.add_argument("--poses", type=Path, default=Path(__file__).parent / "poses.json")
+    parser.add_argument("--poses", type=Path, default=dataset / "poses.json")
     parser.add_argument("--save", type=Path, help="Enregistrer une image PNG")
     parser.add_argument("--no-show", action="store_true", help="Exporter sans ouvrir de fenêtre")
     args = parser.parse_args()
@@ -81,7 +84,7 @@ def main():
     def rebuild_vectors(export=False):
         if not args.vector_map:return
         mapping=VectorMap()
-        for cloud,pose in zip(clouds,poses):mapping.update(cloud,pose)
+        for cloud,pose in zip(clouds,poses):mapping.update(cloud,pose,clear_crossed=not args.keep_vector_features)
         vector_artist.set_segments([f['segment'] for f in mapping.features])
         status.set_text(f"Carte estimee : {len(mapping.features)} segments | X/Y en m | Poses ajustables")
         if export:

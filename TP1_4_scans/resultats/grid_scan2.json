@@ -1,0 +1,18 @@
+{
+  "resolution_m": 0.05,
+  "origin_m": [
+    -8.450000000000001,
+    -7.050000000000001
+  ],
+  "shape_rows_columns": [
+    248,
+    290
+  ],
+  "scan_count": 1,
+  "states": {
+    "unknown": -1,
+    "free": 0,
+    "occupied": 100
+  },
+  "row_order": "Y croissant, ligne 0 en bas de la carte"
+}

@@ -1,0 +1,20 @@
+{
+  "scan1.csv": {
+    "capped_rms_m": 0.19145202267460218,
+    "source_within_20cm": 0.7224669603524229,
+    "reference_within_20cm": 0.7982456140350878,
+    "seconds": 11.985170299885795
+  },
+  "scan2.csv": {
+    "capped_rms_m": 0.30059851777767654,
+    "source_within_20cm": 0.3730684326710817,
+    "reference_within_20cm": 0.41885964912280704,
+    "seconds": 11.524968500016257
+  },
+  "scan4.csv": {
+    "capped_rms_m": 0.04978613788149575,
+    "source_within_20cm": 0.9912472647702407,
+    "reference_within_20cm": 0.993421052631579,
+    "seconds": 11.258355600060895
+  }
+}

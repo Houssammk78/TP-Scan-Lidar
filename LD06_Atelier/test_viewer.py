@@ -1,4 +1,4 @@
-﻿"""Verification des callbacks du viewer sans ouvrir de fenetre."""
+"""Verification des callbacks du viewer sans ouvrir de fenetre."""
 import json,sys,tempfile,unittest
 from pathlib import Path
 from unittest.mock import patch
@@ -19,8 +19,8 @@ class ViewerTests(unittest.TestCase):
             obj=real_button(*a,**k);buttons.append(obj);return obj
         with tempfile.TemporaryDirectory() as directory:
             root=Path(__file__).resolve().parent.parent
-            scans=[root/'scan_20261102_170811_045727.csv',root/'scan_20261102_170911_554109.csv']
-            poses=Path(directory)/'poses.json';poses.write_text((root/'LD06_Atelier/poses.json').read_text())
+            scans=[root/'TP1_4_scans/data/scan1.csv',root/'TP1_4_scans/data/scan2.csv']
+            poses=Path(directory)/'poses.json';poses.write_text((root/'TP1_4_scans/poses.json').read_text())
             output=Path(directory)/'result.csv' if mode=='--vector-map' else Path(directory)/'result'
             export='--export-vectors' if mode=='--vector-map' else '--export-grid'
             def interact():
