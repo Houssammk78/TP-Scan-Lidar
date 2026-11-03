@@ -229,13 +229,22 @@ Départ & Grille (m) & Segments (m) & Scan + ICP (m) & Réussite\\\midrule
 Les dix perturbations testées sont corrigées dans la scène simulée choisie.
 Cela mesure la sensibilité dans cet intervalle seulement ; au-delà des
 départs testés et dans une autre géométrie, le taux peut diminuer.
+Les trois taux sont ici tous à 100\,\% pour chaque départ, soit six
+réussites sur six scans par méthode. La figure place les barres côte à côte
+pour éviter qu'une courbe identique masque les deux autres. Les graphiques
+d'erreur en position et en angle montrent les écarts qui restent malgré ce
+taux de réussite commun. La recherche initiale couvre jusqu'à
+$\pm2{,}5$ m et $\pm100^\circ$ autour de chaque départ ; ces dix essais
+ne testent donc pas les poses situées hors de son domaine de recherche.
 \begin{figure}[H]\centering
 \includegraphics[width=\linewidth]{comparaison_simulation.png}
 \caption{Erreurs de position, d'orientation et temps, échecs inclus.}
 \end{figure}
 \begin{figure}[H]\centering
 \includegraphics[width=.94\linewidth]{sensibilite_initialisation.png}
-\caption{Réussite pour chaque perturbation, sur 6 scans.}
+\caption{Sensibilité aux dix poses initiales : taux de réussite séparés
+par méthode, puis erreurs moyennes en position et en orientation sur
+6 scans simulés.}
 \end{figure}
 \begin{figure}[H]\centering
 \includegraphics[width=\linewidth]{simulation_localisation.png}

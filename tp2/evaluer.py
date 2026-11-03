@@ -33,6 +33,52 @@ def prepare(reference):
  return prepared,times
 
 
+def plot_sensitivity(rows, scan_count, output):
+ """Show coincident success rates separately and expose remaining errors."""
+ names=list(METHODS)
+ labels={'grid_multiresolution':'Grille',
+         'vector_multiresolution':'Segments',
+         'scan_coarse_icp':'Recherche + ICP'}
+ colors=['#1976d2','#e67e22','#2e7d32']
+ indices=np.arange(len(OFFSETS))
+ fig=plt.figure(figsize=(12,8))
+ layout=fig.add_gridspec(2,2,height_ratios=[1,1],hspace=.38,wspace=.25)
+ axes=[fig.add_subplot(layout[0,:]),fig.add_subplot(layout[1,0]),
+       fig.add_subplot(layout[1,1])]
+ for method_index,name in enumerate(names):
+  rates=[];position_errors=[];angle_errors=[]
+  for trial in indices:
+   selected=[row for row in rows if row['method']==name and int(row['trial'])==trial]
+   if len(selected)!=scan_count:
+    raise ValueError(f'{name}, depart {trial}: {len(selected)} scans au lieu de {scan_count}')
+   rates.append(np.mean([row['success'] is True or row['success']=='True'
+                         for row in selected])*100)
+   position_errors.append(np.mean([float(row['position_error_m']) for row in selected])*100)
+   angle_errors.append(np.mean([float(row['angle_error_deg']) for row in selected]))
+  axes[0].bar(indices+(method_index-1)*.26,rates,width=.25,
+              color=colors[method_index],label=labels[name])
+  axes[1].plot(indices,position_errors,'o-',color=colors[method_index],
+               label=labels[name],markersize=4)
+  axes[2].plot(indices,angle_errors,'o-',color=colors[method_index],
+               label=labels[name],markersize=4)
+ axes[0].set(ylabel='Reussite (%)',ylim=(0,108),title='Taux de reussite')
+ axes[1].set(ylabel='Erreur de position moyenne (cm)',title='Precision en position')
+ axes[1].set_ylim(bottom=0)
+ axes[2].set(ylabel='Erreur angulaire moyenne (degres)',title='Precision en orientation')
+ axes[2].set_ylim(bottom=0)
+ for ax in axes:
+  ax.set_xticks(indices)
+  ax.set_xlabel('Pose initiale (indice du tableau)')
+  ax.grid(axis='y',alpha=.25)
+  ax.set_axisbelow(True)
+ axes[0].legend(fontsize=8,loc='lower left')
+ fig.suptitle(f'Sensibilite a la pose initiale - {scan_count} scans simules par depart',
+              y=.97)
+ fig.subplots_adjust(top=.91,bottom=.08,left=.09,right=.98)
+ fig.savefig(output,dpi=160)
+ plt.close(fig)
+
+
 def read_measured_poses(path):
  """Independent robot measurements; blank rows intentionally mean unknown."""
  measured={}
@@ -125,11 +171,7 @@ def main():
  for ax,key,title in zip(axes,['position_error_m','angle_error_deg','seconds'],['Erreur position (m)','Erreur angulaire (degres)','Temps de calcul (s)']):
   ax.boxplot([[r[key] for r in rows if r['method']==n] for n in names],tick_labels=['Grille','Segments','ICP'],showmeans=True);ax.set_title(title);ax.grid(alpha=.2)
  fig.tight_layout();fig.savefig(OUT/'comparaison_simulation.png',dpi=160);plt.close(fig)
- fig,ax=plt.subplots(figsize=(10,5))
- for name in names:
-  rates=[np.mean([r['success'] for r in rows if r['method']==name and r['trial']==t])*100 for t in range(len(OFFSETS))]
-  ax.plot(range(len(OFFSETS)),rates,'o-',label=name)
- ax.set(xticks=range(len(OFFSETS)),xlabel='Initialisation (voir tableau offsets)',ylabel='Reussite (%)',ylim=(-5,105),title=f'Sensibilite a la pose initiale - {len(truths)} scans simules par initialisation');ax.grid(alpha=.2);ax.legend();fig.tight_layout();fig.savefig(OUT/'sensibilite_initialisation.png',dpi=160);plt.close(fig)
+ plot_sensitivity(rows,len(truths),OUT/'sensibilite_initialisation.png')
  fig,axes=plt.subplots(1,3,figsize=(15,6))
  for ax,name in zip(axes,names):
   ax.scatter(*real_reference.T,s=7,c='gray',label='A_01 reference')
