@@ -5,17 +5,57 @@
 \usepackage[margin=2.2cm]{geometry}
 \usepackage{amsmath,amssymb,graphicx,booktabs,longtable,float,xcolor}
 \usepackage[hidelinks]{hyperref}
+\hypersetup{pdftitle={TP1 - Extraction, visualisation et cartographie 2D},pdfauthor={Houssam MAKHLOUK}}
+\setlength{\parskip}{0.35em}
 \graphicspath{{TP1_4_scans/resultats/}}
 \title{TP -- Jour 1\\Extraction, visualisation et cartographie 2D\\\large Acquisition et fusion de quatre scans LD06}
 \author{Houssam MAKHLOUK}
 \date{3 novembre 2026}
 \begin{document}
-\maketitle
+\hypersetup{pageanchor=false}
+\begin{titlepage}
+\thispagestyle{empty}
+\centering
+\vspace*{1.0cm}
+{\Large\bfseries EIGSI LA ROCHELLE\par}
+\vspace{0.35cm}
+{\large Ann\'ee universitaire 2026/2027\par}
+\vspace{1.5cm}
+{\large RAPPORT DE TRAVAUX PRATIQUES\par}
+\vspace{0.4cm}
+{\large Cartographie et localisation en robotique mobile\par}
+\vspace{0.8cm}
+{\color{blue!45!black}\rule{0.88\textwidth}{1.2pt}\par}
+\vspace{0.6cm}
+{\Huge\bfseries TP -- Jour 1\par}
+\vspace{0.5cm}
+{\LARGE\bfseries Extraction, visualisation\\[0.15cm]et cartographie 2D\par}
+\vspace{0.65cm}
+{\large Acquisition et fusion de quatre scans LiDAR LD06\par}
+\vspace{0.6cm}
+{\color{blue!45!black}\rule{0.88\textwidth}{1.2pt}\par}
+\vfill
+{\large R\'ealis\'e par\par}
+\vspace{0.3cm}
+{\LARGE\bfseries Houssam MAKHLOUK\par}
+\vspace{0.3cm}
+{\large \'Etudiant \`a EIGSI La Rochelle\par}
+\vfill
+{\large 3 novembre 2026\par}
+\vspace*{0.6cm}
+\end{titlepage}
+
+\pagenumbering{roman}
+\hypersetup{pageanchor=true}
+\setcounter{tocdepth}{2}
+\tableofcontents
+\thispagestyle{plain}
+\clearpage
+\pagenumbering{arabic}
+
 \begin{abstract}
 Ce travail présente une chaîne de traitement de quatre acquisitions réelles du LiDAR LD06 : lecture de mesures polaires et cartésiennes, visualisation multi-scans, ajustement indépendant des poses, construction d'une carte d'occupation et d'une carte vectorielle. Le lot comprend 1\,821 mesures. La consolidation produit 38 segments et la grille comporte $288\times270$ cellules de 5 cm. Les poses sont estimées par recalage ; les résultats ne constituent pas une validation métrologique de la salle.
 \end{abstract}
-\tableofcontents
-\newpage
 
 \section{Objectifs et données acquises}
 Le TP demande de construire une représentation de l'environnement à partir de scans réels, puis de mettre à jour cette représentation lorsque de nouvelles observations sont disponibles. Deux formes complémentaires sont réalisées : une grille d'occupation et une liste de segments.
