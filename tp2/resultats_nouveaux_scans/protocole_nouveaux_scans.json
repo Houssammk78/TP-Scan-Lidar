@@ -1,0 +1,59 @@
+{
+  "reference_selection": "Paires diagnostiquées avec la méthode entre scans depuis 0° et 180°. Sélection si mêmes hauteurs annoncées et au moins 40% des points appariés dans chaque sens à 20 cm, 70% à 50 cm.",
+  "note_selection": "La sélection fondée sur le scan matching peut favoriser cette méthode. Le recouvrement ne prouve ni la proximité physique ni la pose exacte.",
+  "selected_pairs": [
+    [
+      "N2",
+      "N5"
+    ]
+  ],
+  "initial_poses": [
+    [
+      0,
+      0,
+      0
+    ],
+    [
+      0.5,
+      -0.25,
+      0
+    ],
+    [
+      -0.5,
+      0.3,
+      0
+    ],
+    [
+      0,
+      0,
+      90
+    ],
+    [
+      0,
+      0,
+      180
+    ],
+    [
+      0,
+      0,
+      -90
+    ]
+  ],
+  "scan_4": "Pris au sol selon l'utilisateur ; exclu des comparaisons à hauteur commune.",
+  "common_height_estimated_range_m": [
+    1.0,
+    1.2
+  ],
+  "height_source": "Estimation de l'utilisateur, non mesurée au centimètre.",
+  "ground_truth_available": false,
+  "physical_position_uncertainty_m": null,
+  "physical_angle_uncertainty_deg": null,
+  "real_position_and_angle_errors": "Non calculables sans mesure indépendante des poses.",
+  "real_success_rate": "Non calculable sans mesure indépendante des poses.",
+  "counts": {
+    "scans": 6,
+    "diagnostic_pairs": 15,
+    "comparable_pairs": 1,
+    "method_trials": 18
+  }
+}

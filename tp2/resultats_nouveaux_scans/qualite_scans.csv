@@ -1,0 +1,7 @@
+﻿scan;csv_path;points_acquired;points_compared;angular_coverage_deg;height_group
+N1;acquisitions\scan_20261103_150228\scan_20261103_150228.csv;457;153;359.42;environ 1,00 à 1,20 m (estimation)
+N2;acquisitions\scan_20261103_150436\scan_20261103_150436.csv;456;152;359.15;environ 1,00 à 1,20 m (estimation)
+N3;acquisitions\scan_20261103_150607\scan_20261103_150607.csv;456;152;359.02;environ 1,00 à 1,20 m (estimation)
+N4;acquisitions\scan_20261103_150714\scan_20261103_150714.csv;457;142;359.11;au sol
+N5;acquisitions\scan_20261103_150922\scan_20261103_150922.csv;457;152;359.69;environ 1,00 à 1,20 m (estimation)
+N6;acquisitions\scan_20261103_151020\scan_20261103_151020.csv;457;153;359.75;environ 1,00 à 1,20 m (estimation)

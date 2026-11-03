@@ -1,0 +1,23 @@
+{
+  "capture_source": "COM3 via USB/ESP32",
+  "baud": 115200,
+  "capture_duration_s": 12,
+  "raw_file": "capture_brute.bin",
+  "selected_complete_run_index": 5,
+  "complete_runs_found": 2,
+  "point_count": 457,
+  "angular_coverage_deg": 359.11,
+  "largest_angular_step_deg": 1.82,
+  "min_range_mm": 226,
+  "max_range_mm": 12850,
+  "max_cartesian_rounding_error_mm": 1.57,
+  "position_label": null,
+  "height_m": null,
+  "measured_pose_relative_to_A": null,
+  "measured_uncertainty": null,
+  "note": "Position precise et orientation non mesurees; ne pas utiliser l alignement comme verite terrain.",
+  "scan_label": "N4",
+  "height_description": "au sol (plan lidar non mesure)",
+  "height_estimated_range_m": null,
+  "pose_measured_independently": false
+}

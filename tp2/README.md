@@ -2,7 +2,9 @@
 
 Ce dossier couvre les trois références exigées : une grille d'occupation,
 une carte vectorielle et un autre scan. Les six acquisitions LD06 de A/B,
-les scripts, les essais chiffrés et le rapport sont conservés ici.
+six acquisitions supplémentaires N1 à N6, les scripts, les essais chiffrés
+et le rapport sont conservés ici. Les réponses aux consignes sont présentées
+[question par question](REPONSES_CONSIGNES.md).
 
 ## Reproduire
 
@@ -10,6 +12,7 @@ Depuis la racine du dépôt, avec Python et les dépendances du TP1 :
 
     python -m pip install -r tp1/LD06_Atelier/requirements.txt
     python tp2/evaluer.py
+    python tp2/evaluer_nouveaux_scans.py
     python tp2/creer_rapport.py
     python -m unittest discover -s tp2 -p "test_*.py" -v
 
@@ -84,3 +87,24 @@ et virgule décimale.
 Les cartes, les figures et le protocole JSON sont dans resultats/.
 Les temps varient avec la machine et la simulation utilise un seul type de
 pièce. Les cartes réelles ne contiennent que ce que A_01 a observé.
+
+## Six acquisitions supplémentaires
+
+Les six nouveaux CSV sont dans `acquisitions/scan_20261103_15*`, chacun avec
+la capture brute, l'aperçu et les métadonnées d'acquisition. N1, N2, N3,
+N5 et N6 ont été pris à une hauteur **estimée entre 1,00 et 1,20 m** ; N4
+a été pris au sol. Ce dernier reste visible dans les diagnostics et n'est
+pas mêlé aux comparaisons à hauteur commune.
+
+`evaluer_nouveaux_scans.py` diagnostique les 15 paires avec un recouvrement
+dans les deux sens. Le critère déclaré dans
+`resultats_nouveaux_scans/protocole_nouveaux_scans.json` retient N2–N5 pour
+les trois méthodes, avec six poses initiales strictement communes (18 essais).
+La sélection est exploratoire et peut favoriser la méthode entre scans qui
+sert au diagnostic. Elle ne fournit pas une pose terrain certifiée.
+
+Les fichiers de `resultats_nouveaux_scans/` donnent les diagnostics, les
+estimations, les temps et les deux figures. Les colonnes d'erreur et de
+réussite restent vides sur ces scans réels : les déplacements, rotations et
+leurs incertitudes n'ont pas été mesurés indépendamment des CSV. Le rapport
+LaTeX/PDF utilise ces résultats et décrit les limites de l'alignement.

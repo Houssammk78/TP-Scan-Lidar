@@ -1,6 +1,7 @@
 """Régénère le rapport depuis les résultats, sans chiffres figés dans le texte."""
 import csv
 import json
+import statistics
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
@@ -92,6 +93,90 @@ ground_text = (
     "Aucune pose terrain ni incertitude n'a été mesurée indépendamment. "
     "Les erreurs de pose et les taux de réussite réels ne sont pas calculables."
 )
+
+
+def nouveaux_scans_section():
+    folder = ROOT / "resultats_nouveaux_scans"
+    protocol_file = folder / "protocole_nouveaux_scans.json"
+    comparison_file = folder / "comparaison_methodes.csv"
+    if not protocol_file.exists() or not comparison_file.exists():
+        return ""
+    protocol = json.loads(protocol_file.read_text(encoding="utf-8"))
+    with comparison_file.open(encoding="utf-8-sig", newline="") as file:
+        comparisons = list(csv.DictReader(file, delimiter=";"))
+    if not comparisons:
+        return ""
+    first_pair = protocol["selected_pairs"][0]
+    pair_name = "--".join(first_pair)
+    rows = table(
+        f"{LABELS[item['method']]} & {fmt(item['initial_angle_deg'], 0)} & "
+        f"{fmt(item['estimated_x_m'])} & {fmt(item['estimated_y_m'])} & "
+        f"{fmt(item['estimated_angle_deg'])} & "
+        f"{fmt(min(float(item['query_20cm']), float(item['reference_20cm'])) * 100, 0)} \\\\"
+        for item in comparisons if item["trial"] in {"0", "4"}
+    )
+    times = table(
+        f"{LABELS[method]} & {fmt(statistics.median(float(item['solve_seconds']) for item in comparisons if item['method'] == method), 3)} \\\\"
+        for method in LABELS
+    )
+    section = r"""
+\section{Six acquisitions supplémentaires : vérification sur la salle}
+Six nouveaux scans LD06, nommés N1 à N6 dans l'ordre des fichiers, ont été
+enregistrés dans plusieurs zones de la salle. N1, N2, N3, N5 et N6 ont été
+pris à une hauteur estimée entre 1,00 et 1,20 m par l'utilisateur ; cette
+hauteur n'a pas été relevée au centimètre. N4 a été pris au sol et est exclu
+de la comparaison à hauteur commune. Les six acquisitions sont affichées dans
+leurs repères locaux distincts ; les superposer sans estimation de pose serait
+géométriquement incorrect.
+\begin{figure}[H]\centering
+\includegraphics[width=\linewidth]{resultats_nouveaux_scans/six_scans_bruts.png}
+\caption{Les six scans bruts. N4 est identifié comme acquisition au sol.}
+\end{figure}
+
+Les quinze paires ont été diagnostiquées par recouvrement dans les deux sens.
+Le protocole retient une paire à hauteur commune seulement si au moins
+40\,\% des points sont à moins de 20 cm et 70\,\% à moins de 50 cm
+dans chaque sens après alignement exploratoire. Sur ces données, la seule
+paire retenue est \textbf{@@PAIR@@}. Cette sélection utilise le solveur entre
+scans et peut le favoriser ; elle ne démontre ni la proximité réelle des
+capteurs ni la justesse de la pose estimée. Les cinq autres scans restent
+conservés pour les diagnostics et de futurs essais.
+
+La paire @@PAIR@@ a été soumise aux trois références avec six départs
+strictement identiques : deux départs translatés et les angles initiaux
+0, +90, 180 et $-90^\circ$. Extraits pour les départs à 0 et 180 degrés :
+\begin{center}\small
+\begin{tabular}{lrrrrr}\toprule
+Méthode & Départ ($^\circ$) & $\hat x$ (m) & $\hat y$ (m) &
+$\hat\theta$ ($^\circ$) & Recouv. 20 cm (\,\%)\\\midrule
+@@NEWROWS@@
+\bottomrule\end{tabular}
+\end{center}
+\begin{center}\small
+\begin{tabular}{lr}\toprule Méthode & Temps médian par essai (s)\\\midrule
+@@NEWTIMES@@
+\bottomrule\end{tabular}
+\end{center}
+Le recouvrement indiqué est le minimum des deux directions et n'est pas une
+erreur de position. Les poses estimées varient sensiblement avec le départ ;
+le désaccord entre méthodes signale une ambiguïté des structures observées.
+Le résidu propre à chaque représentation ne constitue pas une mesure terrain.
+\begin{figure}[H]\centering
+\includegraphics[width=\linewidth]{resultats_nouveaux_scans/comparaison_paire_selectionnee.png}
+\caption{Même paire et même départ de 180 degrés pour les trois méthodes.}
+\end{figure}
+
+Les déplacements et rotations réels entre ces acquisitions n'ont pas été
+mesurés indépendamment des CSV, pas plus que leurs incertitudes. Il est donc
+impossible de calculer l'erreur de position, l'erreur angulaire ou un taux de
+réussite réel défendable pour ces essais. Les colonnes correspondantes restent
+vides dans le CSV. La simulation ci-dessus est la validation chiffrée avec
+poses exactes ; les essais réels évaluent le temps, la cohérence et la
+sensibilité à l'initialisation.
+"""
+    return (section.replace("@@PAIR@@", pair_name)
+            .replace("@@NEWROWS@@", rows)
+            .replace("@@NEWTIMES@@", times))
 
 report = r"""
 \documentclass[11pt,a4paper]{article}
@@ -265,6 +350,8 @@ remplace pas l'incertitude d'une mesure terrain indépendante.
 \caption{A\_02 et B\_01 localisés sur A\_01.}
 \end{figure}
 
+@@NEWSCANS@@
+
 \section{Vérification et limites}
 Les tests couvrent les distances, le raycasting, les poses connues, les grandes
 erreurs initiales et les références terrain partielles.
@@ -296,6 +383,7 @@ for marker, value in {
     "@@MEASUREDTABLE@@": measurement_table,
     "@@B01TABLE@@": b01_rows,
     "@@REPEATTABLE@@": repeat_rows,
+    "@@NEWSCANS@@": nouveaux_scans_section(),
 }.items():
     report = report.replace(marker, value)
 (ROOT / "rapport_tp2.tex").write_text(report, encoding="utf-8")

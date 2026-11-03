@@ -1,0 +1,26 @@
+{
+  "capture_source": "COM3 via USB/ESP32",
+  "baud": 115200,
+  "capture_duration_s": 12,
+  "raw_file": "capture_brute.bin",
+  "selected_complete_run_index": 3,
+  "complete_runs_found": 2,
+  "point_count": 456,
+  "angular_coverage_deg": 359.15,
+  "largest_angular_step_deg": 1.58,
+  "min_range_mm": 281,
+  "max_range_mm": 11081,
+  "max_cartesian_rounding_error_mm": 1.72,
+  "position_label": null,
+  "height_m": null,
+  "measured_pose_relative_to_A": null,
+  "measured_uncertainty": null,
+  "note": "Position precise et orientation non mesurees; ne pas utiliser l alignement comme verite terrain.",
+  "scan_label": "N2",
+  "height_description": "environ 1,00 a 1,20 m (estimation utilisateur)",
+  "height_estimated_range_m": [
+    1.0,
+    1.2
+  ],
+  "pose_measured_independently": false
+}

@@ -13,8 +13,10 @@
 
 - [Rapport PDF](tp2/rapport_tp2.pdf) et [source LaTeX](tp2/rapport_tp2.tex).
 - [Guide et protocole](tp2/README.md).
-- [Six scans A/B](tp2/acquisitions).
+- [Réponses aux consignes, question par question](tp2/REPONSES_CONSIGNES.md).
+- [Scans A/B et six acquisitions supplémentaires](tp2/acquisitions).
 - [Resultats des 255 essais](tp2/resultats).
+- [Diagnostics et 18 essais sur les nouveaux scans](tp2/resultats_nouveaux_scans).
 
 Une methode pour chacun des trois supports : grille, segments et scan de reference.
 En simulation : 60 essais par methode, tous reussis sur la scene simulee choisie,
@@ -30,6 +32,7 @@ python -m pip install -r tp1/LD06_Atelier/requirements.txt
 python -m unittest discover -s tp1/LD06_Atelier -p "test_*.py" -v
 python -m unittest discover -s tp2 -p "test_*.py" -v
 python tp2/evaluer.py
+python tp2/evaluer_nouveaux_scans.py
 python tp2/creer_rapport.py
 ```
 
