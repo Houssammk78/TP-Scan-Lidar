@@ -14,7 +14,7 @@
 
 ## TP2 : localisation et scan matching
 
-- [Rapport PDF](tp2/rapport_tp2.pdf) et [source LaTeX](tp2/rapport_tp2.tex).
+- [Rapport PDF](tp2/rapport/rapport_tp2.pdf) et [source LaTeX](tp2/rapport/rapport_tp2.tex).
 - [Guide et protocole](tp2/README.md).
 - [Réponses aux consignes, question par question](tp2/REPONSES_CONSIGNES.md).
 - [Scans A/B et six acquisitions supplémentaires](tp2/acquisitions).

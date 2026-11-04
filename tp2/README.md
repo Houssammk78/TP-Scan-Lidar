@@ -16,8 +16,8 @@ Depuis la racine du dépôt, avec Python et les dépendances du TP1 :
     python tp2/creer_rapport.py
     python -m unittest discover -s tp2 -p "test_*.py" -v
 
-Le rapport PDF est dans [rapport_tp2.pdf](rapport_tp2.pdf) ; sa source LaTeX
-est [rapport_tp2.tex](rapport_tp2.tex). LaTeX n'est requis que pour
+Le rapport PDF est dans [rapport/rapport_tp2.pdf](rapport/rapport_tp2.pdf) ; sa source LaTeX
+est [rapport/rapport_tp2.tex](rapport/rapport_tp2.tex). LaTeX n'est requis que pour
 recompiler le PDF après avoir régénéré le fichier .tex.
 
 Pour un scan individuel :

@@ -343,7 +343,7 @@ report = r"""
 \usepackage[margin=2.1cm]{geometry}
 \usepackage{amsmath,graphicx,booktabs,float,longtable}
 \usepackage[hidelinks]{hyperref}
-\graphicspath{{resultats/}}
+\graphicspath{{../resultats/}{../}}
 \hypersetup{pdfauthor={Houssam MAKHLOUK},pdftitle={TP2 - Localisation et Scan Matching}}
 \begin{document}
 \hypersetup{pageanchor=false}
@@ -687,5 +687,6 @@ for marker, value in {
     "@@NEWSCANS@@": nouveaux_scans_section(),
 }.items():
     report = report.replace(marker, value)
-(ROOT / "rapport_tp2.tex").write_text(report, encoding="utf-8")
+(ROOT / "rapport").mkdir(exist_ok=True)
+(ROOT / "rapport" / "rapport_tp2.tex").write_text(report, encoding="utf-8")
 print("Rapport TP2 généré depuis les résultats calculés.")

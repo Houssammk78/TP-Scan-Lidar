@@ -64,14 +64,14 @@ Le TP demande de construire une représentation de l'environnement à partir de 
 Les deux acquisitions récentes ont été enregistrées par liaison USB via une carte ESP32, sur le port COM3 à 115\,200 bauds. Ce débit concerne la sortie CSV de l'ESP32 vers le PC, et non nécessairement la liaison interne du capteur. Les messages de démarrage et les lignes incomplètes sont écartés. Un tour est retenu lorsque ses indices sont consécutifs et que sa couverture angulaire est supérieure ou égale à $350^\circ$. Ce contrôle n'atteste pas à lui seul l'absence de mouvement ni la précision du montage.
 
 \begin{table}[H]\centering
-\begin{tabular}{llll}
-\toprule Scan & Date d'acquisition & Nombre de points & Hauteur déclarée \\
+\begin{tabular}{lrl}
+\toprule Scan & Nombre de points & Hauteur déclarée \\
 \midrule
-1 & 2 novembre 2026 & 454 & 1,90 m \\
-2 & 2 novembre 2026 & 454 & 1,90 m \\
-3 & 3 novembre 2026 & 456 & 1,90 m \\
-4 & 3 novembre 2026 & 457 & 1,90 m \\
-\midrule Total & & 1\,821 & \\
+1 & 454 & 1,90 m \\
+2 & 454 & 1,90 m \\
+3 & 456 & 1,90 m \\
+4 & 457 & 1,90 m \\
+\midrule Total & 1\,821 & \\
 \bottomrule
 \end{tabular}
 \caption{Jeux de données utilisés. La hauteur de 1,90 m pour les quatre scans est une déclaration de l'utilisateur lors de la préparation de ce rapport ; elle n'est pas mesurée par le LiDAR. Aucune incertitude chiffrée de hauteur n'a été fournie.}
