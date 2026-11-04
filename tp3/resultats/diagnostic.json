@@ -1,0 +1,328 @@
+{
+  "method": "scan_coarse_icp sur nuage global croissant",
+  "initial_pose_source": "estimations TP1/TP2",
+  "accepted": 9,
+  "total": 10,
+  "grid_resolution_m": 0.08,
+  "grid_extent_m": [
+    -4.8,
+    13.68,
+    -10.16,
+    9.280000000000001
+  ],
+  "vector_segments": 20,
+  "exploratory_map": true,
+  "scans": [
+    {
+      "scan": "scan3",
+      "source": "tp1/TP1_4_scans/data/scan3.csv",
+      "points": 456,
+      "pose_initiale": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "pose_estimee": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "status": "ajoute",
+      "reason": "origine de la carte",
+      "height_m": 1.9,
+      "height_source": "declaration utilisateur ou protocole A/B, non mesuree par le LiDAR",
+      "quality": {
+        "within_20cm": null,
+        "within_30cm": null,
+        "median_distance_m": null
+      },
+      "matching": {
+        "score": 0.0,
+        "evaluations": 0,
+        "iterations": 0
+      },
+      "seconds": 7.509998977184296e-05
+    },
+    {
+      "scan": "scan4",
+      "source": "tp1/TP1_4_scans/data/scan4.csv",
+      "points": 457,
+      "pose_initiale": [
+        0.04106463622351941,
+        -0.010476471727314925,
+        -90.05748817673994
+      ],
+      "pose_estimee": [
+        0.03950333882820434,
+        0.000795921540434111,
+        -90.82520313098422
+      ],
+      "status": "ajoute",
+      "reason": "recouvrement et ecart a l'initialisation acceptes",
+      "height_m": 1.9,
+      "height_source": "declaration utilisateur ou protocole A/B, non mesuree par le LiDAR",
+      "quality": {
+        "within_20cm": 0.9978118161925602,
+        "within_30cm": 1.0,
+        "median_distance_m": 0.027919618166633443
+      },
+      "matching": {
+        "score": 0.0025514114544442344,
+        "evaluations": 4786,
+        "iterations": 14,
+        "initial_score": 0.0030998436578760008
+      },
+      "seconds": 0.16097979992628098
+    },
+    {
+      "scan": "A_01",
+      "source": "tp2/acquisitions/position_A_20261103_120212/A_01.csv",
+      "points": 457,
+      "pose_initiale": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "pose_estimee": [
+        -0.01052287289271898,
+        0.023108534220859622,
+        -1.5380941060976738
+      ],
+      "status": "ajoute",
+      "reason": "recouvrement et ecart a l'initialisation acceptes",
+      "height_m": 1.9,
+      "height_source": "declaration utilisateur ou protocole A/B, non mesuree par le LiDAR",
+      "quality": {
+        "within_20cm": 1.0,
+        "within_30cm": 1.0,
+        "median_distance_m": 0.021807369154618787
+      },
+      "matching": {
+        "score": 0.0009409482755523165,
+        "evaluations": 4736,
+        "iterations": 4,
+        "initial_score": 0.006137311120489792
+      },
+      "seconds": 0.20613579987548292
+    },
+    {
+      "scan": "A_02",
+      "source": "tp2/acquisitions/position_A_20261103_120212/A_02.csv",
+      "points": 519,
+      "pose_initiale": [
+        0.0,
+        0.0006394624864247986,
+        -0.25
+      ],
+      "pose_estimee": [
+        -0.00811894433235959,
+        0.026439789038684006,
+        -1.8931177341780483
+      ],
+      "status": "ajoute",
+      "reason": "recouvrement et ecart a l'initialisation acceptes",
+      "height_m": 1.9,
+      "height_source": "declaration utilisateur ou protocole A/B, non mesuree par le LiDAR",
+      "quality": {
+        "within_20cm": 1.0,
+        "within_30cm": 1.0,
+        "median_distance_m": 0.02277346538831861
+      },
+      "matching": {
+        "score": 0.0009314078129712061,
+        "evaluations": 4786,
+        "iterations": 7,
+        "initial_score": 0.006029686943957564
+      },
+      "seconds": 0.2467853999696672
+    },
+    {
+      "scan": "A_03",
+      "source": "tp2/acquisitions/position_A_20261103_120212/A_03.csv",
+      "points": 451,
+      "pose_initiale": [
+        0.0,
+        -0.00024036317034102904,
+        -0.25
+      ],
+      "pose_estimee": [
+        -0.01,
+        0.019759636829658974,
+        -1.75
+      ],
+      "status": "ajoute",
+      "reason": "recouvrement et ecart a l'initialisation acceptes",
+      "height_m": 1.9,
+      "height_source": "declaration utilisateur ou protocole A/B, non mesuree par le LiDAR",
+      "quality": {
+        "within_20cm": 1.0,
+        "within_30cm": 1.0,
+        "median_distance_m": 0.022349201430978103
+      },
+      "matching": {
+        "score": 0.0008109564133157453,
+        "evaluations": 4756,
+        "iterations": 4,
+        "initial_score": 0.004701075313809431
+      },
+      "seconds": 0.20331239979714155
+    },
+    {
+      "scan": "B_01",
+      "source": "tp2/acquisitions/position_B_20261103_120333/B_01.csv",
+      "points": 456,
+      "pose_initiale": [
+        -0.89,
+        -0.04,
+        -1.0
+      ],
+      "pose_estimee": [
+        -0.89,
+        0.01,
+        -2.5
+      ],
+      "status": "ajoute",
+      "reason": "recouvrement et ecart a l'initialisation acceptes",
+      "height_m": 1.9,
+      "height_source": "declaration utilisateur ou protocole A/B, non mesuree par le LiDAR",
+      "quality": {
+        "within_20cm": 1.0,
+        "within_30cm": 1.0,
+        "median_distance_m": 0.03438697110221493
+      },
+      "matching": {
+        "score": 0.001690455865768684,
+        "evaluations": 4736,
+        "iterations": 3,
+        "initial_score": 0.004246517663653243
+      },
+      "seconds": 0.19395840005017817
+    },
+    {
+      "scan": "B_02",
+      "source": "tp2/acquisitions/position_B_20261103_120333/B_02.csv",
+      "points": 455,
+      "pose_initiale": [
+        -0.89,
+        -0.04,
+        -0.75
+      ],
+      "pose_estimee": [
+        -0.88,
+        0.009999999999999985,
+        -2.5
+      ],
+      "status": "ajoute",
+      "reason": "recouvrement et ecart a l'initialisation acceptes",
+      "height_m": 1.9,
+      "height_source": "declaration utilisateur ou protocole A/B, non mesuree par le LiDAR",
+      "quality": {
+        "within_20cm": 1.0,
+        "within_30cm": 1.0,
+        "median_distance_m": 0.032563477725749274
+      },
+      "matching": {
+        "score": 0.0014249448514928101,
+        "evaluations": 4751,
+        "iterations": 10,
+        "initial_score": 0.004987730470984443
+      },
+      "seconds": 0.22816619998775423
+    },
+    {
+      "scan": "B_03",
+      "source": "tp2/acquisitions/position_B_20261103_120333/B_03.csv",
+      "points": 454,
+      "pose_initiale": [
+        -0.89,
+        -0.03,
+        -1.0
+      ],
+      "pose_estimee": [
+        -0.8866697393809159,
+        0.021506404418240203,
+        -2.4399567626753367
+      ],
+      "status": "ajoute",
+      "reason": "recouvrement et ecart a l'initialisation acceptes",
+      "height_m": 1.9,
+      "height_source": "declaration utilisateur ou protocole A/B, non mesuree par le LiDAR",
+      "quality": {
+        "within_20cm": 1.0,
+        "within_30cm": 1.0,
+        "median_distance_m": 0.03261187331362209
+      },
+      "matching": {
+        "score": 0.0015126828651101266,
+        "evaluations": 4736,
+        "iterations": 8,
+        "initial_score": 0.004036623359485682
+      },
+      "seconds": 0.26098499982617795
+    },
+    {
+      "scan": "scan1",
+      "source": "tp1/TP1_4_scans/data/scan1.csv",
+      "points": 454,
+      "pose_initiale": [
+        2.7889270630122076,
+        1.1929466642565698,
+        174.05062402806982
+      ],
+      "pose_estimee": [
+        2.7889270630122076,
+        1.1829466642565698,
+        173.80062402806982
+      ],
+      "status": "ajoute",
+      "reason": "recouvrement et ecart a l'initialisation acceptes",
+      "height_m": 1.9,
+      "height_source": "declaration utilisateur ou protocole A/B, non mesuree par le LiDAR",
+      "quality": {
+        "within_20cm": 0.7224669603524229,
+        "within_30cm": 0.7422907488986784,
+        "median_distance_m": 0.047918701581616166
+      },
+      "matching": {
+        "score": 0.09407208675066696,
+        "evaluations": 4766,
+        "iterations": 10,
+        "initial_score": 0.09423260134543925
+      },
+      "seconds": 0.2612383000086993
+    },
+    {
+      "scan": "scan2",
+      "source": "tp1/TP1_4_scans/data/scan2.csv",
+      "points": 453,
+      "pose_initiale": [
+        5.602987878978437,
+        -1.3422689881036982,
+        -83.93236182570911
+      ],
+      "pose_estimee": [
+        5.532987878978437,
+        -1.4922689881036981,
+        -86.18236182570911
+      ],
+      "status": "ecarte",
+      "reason": "recouvrement insuffisant ou pose trop eloignee de l'initialisation",
+      "height_m": 1.9,
+      "height_source": "declaration utilisateur ou protocole A/B, non mesuree par le LiDAR",
+      "quality": {
+        "within_20cm": 0.49448123620309054,
+        "within_30cm": 0.5452538631346578,
+        "median_distance_m": 0.20506500802348285
+      },
+      "matching": {
+        "score": 0.16189439239580092,
+        "evaluations": 4716,
+        "iterations": 28,
+        "initial_score": 0.16770697028562528
+      },
+      "seconds": 0.32585280016064644
+    }
+  ],
+  "ground_truth_available": false,
+  "excluded_other_scans": "N1,N2,N3,N5,N6: hauteur estimee 1,00-1,20 m; N4: sol"
+}

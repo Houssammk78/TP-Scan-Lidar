@@ -33,6 +33,13 @@ Ouvrir [l'atelier LiDAR en HTML](simulateur_html/index.html) dans un navigateur.
 Glisser les scans CSV du LD06 pour afficher la pièce, estimer leur alignement,
 corriger les poses et exporter le plan PNG et les points fusionnés.
 
+## TP3 : intégration SLAM et carte de la salle
+
+- [Rapport PDF](tp3/rapport/rapport_tp3.pdf) et [source LaTeX](tp3/rapport/rapport_tp3.tex).
+- [Guide et limites](tp3/README.md).
+- [Carte finale](tp3/resultats/carte_finale.png) et [progression](tp3/resultats/progression.png).
+- [Grille, segments, poses et diagnostic](tp3/resultats).
+
 ## Installation et tests
 
 Depuis la racine du depot :
