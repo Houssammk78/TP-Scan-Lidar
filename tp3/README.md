@@ -69,7 +69,8 @@ géométrique absolue ne peuvent donc pas être certifiées avec ces CSV seuls.
 
 Le [dossier bonus](bonus_robot/README.md) contient les CSV acquis avec le robot,
 le rejeu avec 117 scans distincts, les cartes de séquences localement recalées
-et un programme de pilotage automatique limité par impulsions. Le firmware
+et une [vue regroupée exploratoire](bonus_robot/resultats_rejeu/carte_regroupee_exploratoire.png).
+Un programme de pilotage automatique limité par impulsions est également fourni. Le firmware
 arrête les lectures LiDAR pendant le mouvement ; la carte est donc mise à jour
 après chaque arrêt, lorsque le capteur a produit un scan frais. Le mode direct
 est prêt à être essayé sur le robot, mais ses déplacements réels n'ont pas été

@@ -26,6 +26,26 @@ une trajectoire estimée et une image `slam_mobile.png`. La [sous-carte 07](resu
 est la plus longue séquence continue de ce lot : 25 scans acceptés sur 31.
 [Bilan JSON](resultats_rejeu/bilan_rejeu.json).
 
+### Vue regroupée exploratoire
+
+Les 13 sous-cartes ont aussi été recalées **indépendamment** sur la
+[carte exploratoire TP3 antérieure](../resultats/carte_exploratoire.png) par
+recherche grossière de pose puis ICP. Le résultat est une [vue regroupée](resultats_rejeu/carte_regroupee_exploratoire.png)
+semblable à une carte de salle, et non une preuve que les 13 poses sont justes.
+Avec les seuils indicatifs de 35 % des cellules occupées à moins de 30 cm et un
+score au plus égal à 0,12 m², **six raccords sont plausibles et sept restent
+incertains**. Les raccords incertains sont affichés plus pâles. Les poses,
+scores et points projetés sont dans [raccords_exploratoires.csv](resultats_rejeu/raccords_exploratoires.csv)
+et [points_regroupes_exploratoires.csv](resultats_rejeu/points_regroupes_exploratoires.csv).
+La grille de fond provient des anciens scans TP3 : elle sert de repère et ne
+prouve pas que les nouveaux scans, à eux seuls, couvrent toute la pièce.
+
+Pour régénérer cette vue après le rejeu :
+
+```powershell
+python tp3/bonus_robot/fusion_exploratoire.py
+```
+
 `pose_x`, `pose_y` et `pose_angle_deg` du CSV ne sont **pas** une odométrie :
 le firmware écrit dans le paquet les valeurs manuellement saisies via `/pose`.
 Elles valent ici 0 et ne sont pas utilisées pour calculer les trajectoires.

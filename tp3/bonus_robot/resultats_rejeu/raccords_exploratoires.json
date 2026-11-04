@@ -1,0 +1,151 @@
+{
+  "reference": "tp3/resultats/grid_map_exploratoire.npz",
+  "method": "recherche grossiere de poses puis ICP sur cellules occupees",
+  "ground_truth_available": false,
+  "warning": "Raccords approximatifs, non valides par mesure physique. Ne pas utiliser pour navigation.",
+  "rows": [
+    {
+      "submap": "sous_carte_01",
+      "scans_accepted": 12,
+      "x_m": -0.9486161201791075,
+      "y_m": 1.5602186454459344,
+      "angle_deg": 15.266219896568572,
+      "median_m": 0.3174277418315058,
+      "within_30cm": 0.476,
+      "score_m2": 0.15798021306978347,
+      "visual_status": "incertain"
+    },
+    {
+      "submap": "sous_carte_02",
+      "scans_accepted": 1,
+      "x_m": -2.6962748879362,
+      "y_m": 5.652716819364371,
+      "angle_deg": -78.42527246115618,
+      "median_m": 0.3276895505666134,
+      "within_30cm": 0.488,
+      "score_m2": 0.15868689338492437,
+      "visual_status": "incertain"
+    },
+    {
+      "submap": "sous_carte_03",
+      "scans_accepted": 13,
+      "x_m": -1.8326941894148676,
+      "y_m": -1.0684719133157576,
+      "angle_deg": 152.69285119901673,
+      "median_m": 0.3564452361354774,
+      "within_30cm": 0.468,
+      "score_m2": 0.167933637606588,
+      "visual_status": "incertain"
+    },
+    {
+      "submap": "sous_carte_04",
+      "scans_accepted": 6,
+      "x_m": -2.0972085706883026,
+      "y_m": -0.585396252885757,
+      "angle_deg": -150.98460016125858,
+      "median_m": 0.16960068862365218,
+      "within_30cm": 0.568,
+      "score_m2": 0.1371008168211472,
+      "visual_status": "incertain"
+    },
+    {
+      "submap": "sous_carte_05",
+      "scans_accepted": 4,
+      "x_m": -0.6076255782168005,
+      "y_m": -1.7372238937925202,
+      "angle_deg": 10.309069152405101,
+      "median_m": 0.13282135617160373,
+      "within_30cm": 0.644,
+      "score_m2": 0.11217168936935297,
+      "visual_status": "plausible"
+    },
+    {
+      "submap": "sous_carte_06",
+      "scans_accepted": 15,
+      "x_m": -0.5712461657295297,
+      "y_m": -1.847647829530778,
+      "angle_deg": 94.05289916433264,
+      "median_m": 0.1504938468299688,
+      "within_30cm": 0.708,
+      "score_m2": 0.09190693055219465,
+      "visual_status": "plausible"
+    },
+    {
+      "submap": "sous_carte_07",
+      "scans_accepted": 25,
+      "x_m": -0.10396496099386783,
+      "y_m": -1.6585001819142686,
+      "angle_deg": 72.84541430079801,
+      "median_m": 0.12306371249407104,
+      "within_30cm": 0.732,
+      "score_m2": 0.08046822857364684,
+      "visual_status": "plausible"
+    },
+    {
+      "submap": "sous_carte_08",
+      "scans_accepted": 2,
+      "x_m": 0.23120796485850548,
+      "y_m": -2.0843479111244965,
+      "angle_deg": -20.238187669160965,
+      "median_m": 0.11932745336575738,
+      "within_30cm": 0.7382198952879581,
+      "score_m2": 0.08243201659327612,
+      "visual_status": "plausible"
+    },
+    {
+      "submap": "sous_carte_09",
+      "scans_accepted": 1,
+      "x_m": -3.3484563115942008,
+      "y_m": -1.3021144980741801,
+      "angle_deg": -1.3066539054786972,
+      "median_m": 0.24053677895534095,
+      "within_30cm": 0.5435897435897435,
+      "score_m2": 0.14225998329454367,
+      "visual_status": "incertain"
+    },
+    {
+      "submap": "sous_carte_10",
+      "scans_accepted": 3,
+      "x_m": -2.8508990829118686,
+      "y_m": -2.7779273505945876,
+      "angle_deg": 29.12500917398259,
+      "median_m": 0.27019544465229667,
+      "within_30cm": 0.54,
+      "score_m2": 0.137276895802632,
+      "visual_status": "incertain"
+    },
+    {
+      "submap": "sous_carte_11",
+      "scans_accepted": 2,
+      "x_m": -0.4408584817084319,
+      "y_m": 2.8639256155148685,
+      "angle_deg": -80.29607439327212,
+      "median_m": 0.1895518255789453,
+      "within_30cm": 0.592,
+      "score_m2": 0.13647152348618308,
+      "visual_status": "incertain"
+    },
+    {
+      "submap": "sous_carte_12",
+      "scans_accepted": 1,
+      "x_m": 3.0254516957990885,
+      "y_m": 0.24338940981177054,
+      "angle_deg": -176.32668442514543,
+      "median_m": 0.16561327099658157,
+      "within_30cm": 0.6811594202898551,
+      "score_m2": 0.09790143279082597,
+      "visual_status": "plausible"
+    },
+    {
+      "submap": "sous_carte_13",
+      "scans_accepted": 1,
+      "x_m": -4.422773777742753,
+      "y_m": 4.688803371854304,
+      "angle_deg": -176.01901453026673,
+      "median_m": 0.14171098813768113,
+      "within_30cm": 0.6244725738396625,
+      "score_m2": 0.11129580655749656,
+      "visual_status": "plausible"
+    }
+  ]
+}

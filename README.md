@@ -41,7 +41,8 @@ corriger les poses et exporter le plan PNG et les points fusionnés.
 - [Carte finale](tp3/resultats/carte_finale.png) et [progression](tp3/resultats/progression.png).
 - [Grille, segments, poses et diagnostic](tp3/resultats).
 - [Bonus robot mobile : code, CSV acquis et sous-cartes](tp3/bonus_robot/README.md),
-  avec [vue des sous-cartes](tp3/bonus_robot/resultats_rejeu/vue_sous_cartes.png).
+  avec [vue des sous-cartes](tp3/bonus_robot/resultats_rejeu/vue_sous_cartes.png)
+  et [regroupement exploratoire](tp3/bonus_robot/resultats_rejeu/carte_regroupee_exploratoire.png).
 
 ## Installation et tests
 

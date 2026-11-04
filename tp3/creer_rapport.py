@@ -210,17 +210,23 @@ bonus_file = ROOT / "bonus_robot" / "resultats_rejeu" / "bilan_rejeu.json"
 if bonus_file.is_file():
     bonus = json.loads(bonus_file.read_text(encoding="utf-8"))
     kept = sum(part["accepted"] for part in bonus["submaps"])
+    links_file = ROOT / "bonus_robot" / "resultats_rejeu" / "raccords_exploratoires.json"
+    links = json.loads(links_file.read_text(encoding="utf-8")) if links_file.is_file() else None
     bonus_section = r"""
 \section{Bonus : acquisitions avec le robot mobile}
-Le robot ESP32 a permis l'acquisition de @@MOBILE_TOTAL@@ scans distincts lors de
-déplacements commandés par l'utilisateur. Le plus récent export cumulatif
+Le robot ESP32 a fonctionné et a été déplacé par l'opérateur pendant la séance
+d'acquisition. D'après les CSV fournis, @@MOBILE_TOTAL@@ scans distincts ont été
+enregistrés pendant cette séance. Le plus récent export cumulatif
 comprend 114 scans ; quatre CSV individuels plus tardifs ont été ajoutés et un
 doublon exact a été retiré. Les exports cumulatifs précédents contiennent les
 mêmes premiers scans et ne sont donc pas additionnés. La hauteur du capteur et
 les poses réelles du robot n'ont pas été relevées dans ces fichiers.
 
 Le firmware suspend la lecture du LiDAR pendant une impulsion moteur. Un scan
-renvoyé par le serveur pendant ce mouvement peut donc être ancien. Le programme
+renvoyé par le serveur pendant ce mouvement peut donc être ancien. Les commandes
+de déplacement et les captures appartiennent à la même séance, mais les CSV ne
+prouvent pas qu'un nouveau tour LiDAR ait été acquis pendant que les roues
+tournaient. Le programme
 bonus applique une boucle arrêt, scan frais, localisation ICP locale, mise à jour
 de la grille, puis courte impulsion de mouvement. Il vérifie le dégagement frontal
 et arrête le robot si le scan est absent, si le recalage échoue ou si un obstacle
@@ -234,6 +240,9 @@ interdisent de les superposer comme si leurs poses relatives étaient connues.
 Les champs \texttt{pose\_x}, \texttt{pose\_y} et \texttt{pose\_angle\_deg} sont
 renseignés manuellement par la route \texttt{/pose} du firmware ; ils ne sont pas
 une vérité terrain et n'ont pas été employés pour le recalage.
+@@GROUPED_TEXT@@
+@@GROUPED_FIGURE@@
+@@GROUPED_TABLE@@
 \begin{figure}[H]\centering
 \includegraphics[width=.95\linewidth,height=.67\textheight,keepaspectratio]{../bonus_robot/resultats_rejeu/vue_sous_cartes.png}
 \caption{Sous-cartes calculées à partir du déplacement du robot. Chaque panneau
@@ -251,6 +260,49 @@ position indépendantes.}
     bonus_section = (bonus_section.replace("@@MOBILE_TOTAL@@", str(bonus["source_scans"]))
                      .replace("@@MOBILE_ACCEPTED@@", str(kept))
                      .replace("@@MOBILE_SUBMAPS@@", str(len(bonus["submaps"]))))
+    if links is not None:
+        plausible = sum(row["visual_status"] == "plausible" for row in links["rows"])
+        grouped_text = r"""
+Pour regrouper les sous-cartes dans un même dessin, la carte TP3 antérieure
+sert de repère géométrique explicite. Une recherche grossière de translations
+et rotations est affinée par ICP sur les cellules occupées. Sur les
+@@SUBMAPS@@ sous-cartes, @@PLAUSIBLE@@ raccords passent les seuils indicatifs de
+35\% de cellules occupées à moins de 30 cm et de score inférieur ou égal à
+0,12 m$^2$. Les autres restent incertains. Ces seuils n'ont pas été validés
+par des poses terrain ; les couleurs et la superposition ne constituent pas
+une carte globale métriquement certifiée. La grille de fond comprend des scans
+antérieurs et ne mesure pas la seule couverture du robot mobile.
+""".replace("@@SUBMAPS@@", str(len(links["rows"]))).replace("@@PLAUSIBLE@@", str(plausible))
+        grouped_figure = r"""
+\begin{figure}[H]\centering
+\includegraphics[width=.95\linewidth,height=.70\textheight,keepaspectratio]{../bonus_robot/resultats_rejeu/carte_regroupee_exploratoire.png}
+\caption{Regroupement exploratoire des sous-cartes du robot sur la carte TP3
+antérieure. Les couleurs vives indiquent les raccords plausibles selon le score
+choisi ; les points pâles indiquent les raccords incertains.}
+\end{figure}
+"""
+        link_rows = "\n".join(
+            f"{tex(row['submap'])} & {row['x_m']:.2f} & {row['y_m']:.2f} & "
+            f"{row['angle_deg']:.1f} & {100 * row['within_30cm']:.0f}\\% & "
+            f"{row['score_m2']:.3f} & "
+            + ("Plausible" if row["visual_status"] == "plausible" else "Incertain")
+            + r" \\" for row in links["rows"]
+        )
+        grouped_table = (r"""
+\begin{longtable}{lrrrrrl}
+\toprule Sous-carte & X (m) & Y (m) & $\theta$ ($^\circ$) & $<30$ cm & Score (m$^2$) & Statut \\
+\midrule\endhead
+""" + link_rows + r"""
+\bottomrule
+\end{longtable}
+Les poses du tableau sont des raccords estimés au repère du TP3 antérieur,
+et non des déplacements mesurés du robot.
+""")
+    else:
+        grouped_text = grouped_figure = grouped_table = ""
+    bonus_section = (bonus_section.replace("@@GROUPED_TEXT@@", grouped_text)
+                     .replace("@@GROUPED_FIGURE@@", grouped_figure)
+                     .replace("@@GROUPED_TABLE@@", grouped_table))
     template = template.replace(r"\section{Reproduction}", bonus_section + r"\section{Reproduction}")
 
 replacements = {
