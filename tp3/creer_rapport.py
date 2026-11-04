@@ -64,8 +64,9 @@ template = r"""
 Le TP1 fournit la lecture des CSV, la conversion des coordonnées, une grille
 d'occupation et une carte vectorielle. Le TP2 fournit la localisation entre
 scans. Ce TP3 les enchaîne : après chaque estimation de pose, le nouveau scan
-est projeté dans le repère global et inséré dans les deux cartes. Il s'agit
-d'une première intégration SLAM hors ligne. La carte n'est pas corrigée par
+est projeté dans le repère global et inséré dans les deux cartes. Le rejeu
+est incrémental : le scan courant n'utilise que la carte construite avec les
+scans précédents. Il s'agit d'un début de SLAM sur des scans enregistrés. La carte n'est pas corrigée par
 fermeture de boucle ni par optimisation globale des poses.
 
 \section{Données, sélection et repères}
@@ -76,9 +77,11 @@ LiDAR. Les acquisitions N1, N2, N3, N5 et N6 ont une hauteur estimée entre
 1,00 et 1,20 m ; N4 a été pris au sol. Ces acquisitions restent disponibles
 dans le TP2, mais ne sont pas superposées à cette coupe 2D.
 
-Le scan 3 du TP1 fixe le repère $(0,0,0^\circ)$. Les autres poses initiales
-proviennent des estimations des TP1 et TP2. Elles ne sont pas des mesures
-terrain indépendantes. Les fichiers sources et leurs coordonnées locales sont
+Le scan 1 du TP1 fixe le repère $(0,0,0^\circ)$. Les scans sont rejoués dans
+l'ordre d'acquisition. Aucune pose sauvegardée
+des TP1 et TP2 n'est utilisée pour localiser les scans suivants. Les poses
+initiales sont générées avec la dernière pose estimée et les centres des
+nuages pour quatre orientations candidates. Les fichiers sources et leurs coordonnées locales sont
 conservés ; les coordonnées globales produites sont exportées séparément.
 
 \section{Algorithme de localisation et de cartographie}
@@ -88,12 +91,12 @@ Pour chaque scan $S_k$, l'algorithme extrait les points valides entre 0,15 et
 \texttt{scan\_coarse\_icp} du TP2 cherche la pose par recherche multirésolution,
 puis affine par ICP. Le nuage de référence est réduit à un représentant par
 cellule de 7 cm, puis au maximum à 700 points pour limiter le temps de calcul.
-La nouvelle pose est conservée si son score est meilleur que celui de la pose
-initiale. La pose est donc réévaluée avant chaque mise à jour de carte.
+Cinq hypothèses initiales sont essayées : la dernière pose et quatre rotations
+relatives à celle-ci, recentrées sur le nuage déjà cartographié. La pose au
+coût le plus faible est évaluée avant chaque mise à jour de carte.
 
 Un contrôle refuse l'ajout si moins de 32\% des points sont à 30 cm de la
-référence, si le score plafonné dépasse 0,11 m$^2$, ou si la correction par
-rapport à l'initialisation dépasse 1,5 m ou 35$^\circ$. Ces seuils servent
+référence ou si le score plafonné dépasse 0,11 m$^2$. Ces seuils servent
 à limiter les fusions manifestement incompatibles ; ils ne démontrent pas
 qu'une pose acceptée est géométriquement exacte.
 
@@ -101,11 +104,21 @@ qu'une pose acceptée est géométriquement exacte.
 La grid map a une résolution de @@RES@@ m. Elle contient trois états : inconnu
 $(-1)$, libre $(0)$ et occupé $(100)$. Chaque rayon marque les cellules
 traversées comme libres et la cellule d'impact comme occupée. Le calcul utilise
-la pose estimée pour le scan courant. La carte vectorielle extrait des segments
+la pose estimée pour le scan courant. La grille s'agrandit en cellules
+inconnues lorsqu'un nouvel impact sort de ses bornes. La carte vectorielle extrait des segments
 du scan local, les place dans le repère global et fusionne ceux qui sont
 proches en position et orientation. Le découpage par rayons libres est désactivé
 ici afin que de petites erreurs de pose ne suppriment pas les anciens segments.
 Une mise à jour automatique de la géométrie des poses passées n'est pas faite.
+
+\subsection{Contrôles reproductibles}
+Un test de simulation utilise 80 points déterministes et une pose connue
+$(0,70\,\mathrm{m},-0,35\,\mathrm{m},25^\circ)$. Le recalage retrouve cette pose
+à moins de 0,03 m sur chaque coordonnée et 0,03$^\circ$ sur l'orientation.
+Un second test vérifie l'agrandissement de la grille avant l'insertion d'un
+rayon nouveau. Un rejeu de deux scans réels vérifie que les cartes et les
+exports sont produits sans lecture des poses sauvegardées. Ces tests ne
+remplacent pas une mesure indépendante dans la salle.
 
 \section{Résultats calculés}
 @@ACCEPTED@@ scans sur @@TOTAL@@ ont été ajoutés, soit @@POINTS@@ points
@@ -166,6 +179,7 @@ Depuis la racine du dépôt :
 python -m pip install -r tp1/LD06_Atelier/requirements.txt
 python tp3/slam.py
 python tp3/creer_rapport.py
+python -m unittest discover -s tp3 -p "test_*.py" -v
 \end{verbatim}
 Compiler ensuite \texttt{tp3/rapport/rapport\_tp3.tex} depuis son dossier.
 Les CSV, JSON, figures et cartes exportées sont dans \texttt{tp3/resultats/}.

@@ -1,10 +1,11 @@
-"""TP3 : recalage de scans réels puis mise à jour progressive de deux cartes.
+"""TP3 : localisation et cartographie incrémentales, sans poses pré-calculées.
 
 Lancer depuis la racine du dépôt : python tp3/slam.py
-Les poses initiales viennent des estimations TP1/TP2, jamais d'un relevé terrain.
+Chaque nouveau scan ne voit que la carte construite avec les scans précédents.
 """
 from __future__ import annotations
 
+import argparse
 import csv
 import copy
 import json
@@ -33,19 +34,13 @@ from localisation import ScanReference, coarse_icp, nearest_squared, objective, 
 def inputs():
     tp1 = REPO / "tp1" / "TP1_4_scans"
     tp2 = REPO / "tp2" / "acquisitions"
-    old = json.loads((tp1 / "poses.json").read_text(encoding="utf-8"))
-    names = ["scan3", "scan4", "A_01", "A_02", "A_03", "B_01", "B_02", "B_03", "scan1", "scan2"]
+    names = ["scan1", "scan2", "scan3", "scan4", "A_01", "A_02", "A_03", "B_01", "B_02", "B_03"]
     paths = {
         **{f"scan{i}": tp1 / "data" / f"scan{i}.csv" for i in range(1, 5)},
         **{f"A_0{i}": tp2 / "position_A_20261103_120212" / f"A_0{i}.csv" for i in range(1, 4)},
         **{f"B_0{i}": tp2 / "position_B_20261103_120333" / f"B_0{i}.csv" for i in range(1, 4)},
     }
-    seeds = {f"scan{i}": old[f"scan{i}.csv"] for i in range(1, 5)}
-    with (REPO / "tp2" / "resultats" / "poses_estimees_csv.csv").open(encoding="utf-8-sig", newline="") as f:
-        for row in csv.DictReader(f, delimiter=";"):
-            if row["scan"] in paths:
-                seeds[row["scan"]] = [float(row[k].replace(",", ".")) for k in ("x_estime_m", "y_estime_m", "angle_estime_deg")]
-    return [(name, paths[name], valid_scan(load_scan(paths[name])), np.asarray(seeds[name], float)) for name in names]
+    return [(name, paths[name]) for name in names]
 
 
 def compact_cloud(points, limit=700, voxel=.07):
@@ -58,16 +53,51 @@ def compact_cloud(points, limit=700, voxel=.07):
     return points
 
 
-def make_grid(items, resolution=.08):
-    """Allocate bounds from initial poses; no future impact is inserted yet."""
-    projected = []
-    for _, _, cloud, seed in items:
-        projected.append(apply_pose(cloud, *seed))
-        projected.append(seed[:2][None, :])
-    points = np.vstack(projected)
-    low = np.floor((points.min(axis=0) - 3) / resolution) * resolution
-    high = np.ceil((points.max(axis=0) + 3) / resolution) * resolution
+def make_grid(first_scan, resolution=.08):
+    """Allocate only from the first scan; later observations expand the map."""
+    points = np.vstack([first_scan, np.zeros((1, 2))])
+    low = np.floor((points.min(axis=0) - 1) / resolution) * resolution
+    high = np.ceil((points.max(axis=0) + 1) / resolution) * resolution
     return GridMap(low, high - low, resolution)
+
+
+def expand_grid(grid, cloud, pose, margin=.6):
+    """Grow unknown cells around a new beam footprint before updating."""
+    points = np.vstack([apply_pose(cloud, *pose), np.asarray(pose[:2])[None, :]])
+    low = points.min(axis=0) - margin
+    high = points.max(axis=0) + margin
+    current_high = grid.origin + np.array(grid.cells.shape[::-1]) * grid.resolution
+    before = np.maximum(0, np.ceil((grid.origin - low) / grid.resolution).astype(int))
+    after = np.maximum(0, np.ceil((high - current_high) / grid.resolution).astype(int))
+    if np.any(before) or np.any(after):
+        new_shape = np.array(grid.cells.shape) + np.array([before[1] + after[1], before[0] + after[0]])
+        if np.prod(new_shape) > 10_000_000:
+            raise ValueError("La grille agrandie dépasserait 10 millions de cellules")
+        grid.cells = np.pad(grid.cells, ((before[1], after[1]), (before[0], after[0])), constant_values=-1)
+        grid.origin -= before * grid.resolution
+
+
+def propose_initials(cloud, reference_points, previous_pose):
+    """Generate hypotheses from scan geometry and last pose, never saved TP poses."""
+    angles = [wrap(previous_pose[2] + delta) for delta in (0, 90, 180, -90)]
+    ref_center = np.median(reference_points, axis=0)
+    guesses = [np.asarray(previous_pose, float)]
+    for angle in angles:
+        rotated = apply_pose(cloud, 0, 0, angle)
+        translation = ref_center - np.median(rotated, axis=0)
+        guesses.append(np.array([translation[0], translation[1], angle]))
+    return guesses
+
+
+def estimate_pose(cloud, reference_points, previous_pose):
+    model = ScanReference(compact_cloud(reference_points), resolution=.08)
+    trials = []
+    for initial in propose_initials(cloud, reference_points, previous_pose):
+        pose, info = coarse_icp(cloud[::2], model, initial)
+        score = objective(model, cloud[::2], pose)
+        trials.append((score, pose, initial, info))
+    score, pose, initial, info = min(trials, key=lambda item: item[0])
+    return pose, initial, {**info, "score": score, "hypotheses": len(trials)}, model
 
 
 def quality(query, reference_points, pose):
@@ -115,55 +145,64 @@ def draw_map(grid, pose_rows, path, title, segments=None, clouds=None):
     plt.close(fig)
 
 
-def run():
-    OUT.mkdir(parents=True, exist_ok=True)
-    items = inputs()
-    grid = make_grid(items)
+def run(sources=None, out=OUT):
+    """Replay an ordered scan stream; no later scan participates in a current pose."""
+    out = Path(out)
+    out.mkdir(parents=True, exist_ok=True)
+    default_dataset = sources is None
+    items = inputs() if default_dataset else [(name, Path(path)) for name, path in sources]
+    if not items:
+        raise ValueError("Au moins un scan est requis")
+    grid = None
     vector = VectorMap()
     rows, accepted, fused = [], [], []
     snapshots = []
-    for index, (name, path, cloud, seed) in enumerate(items):
+    loaded = {}
+    for index, (name, path) in enumerate(items):
         t0 = time.perf_counter()
+        cloud = valid_scan(load_scan(path))
+        loaded[name] = cloud
         if index == 0:
+            grid = make_grid(cloud)
             pose = np.zeros(3)
+            initial = pose.copy()
             info = {"score": 0.0, "evaluations": 0, "iterations": 0}
             fit = {"within_20cm": None, "within_30cm": None, "median_distance_m": None}
             accepted_here = True
             reason = "origine de la carte"
         else:
             reference_points = compact_cloud(np.vstack(accepted))
-            model = ScanReference(reference_points, resolution=.08)
-            candidate, info = coarse_icp(cloud[::2], model, seed)
-            # A prior estimate is retained when it fits the growing map better.
-            seed_cost = objective(model, cloud[::2], seed)
-            pose = candidate if info["score"] <= seed_cost else seed.copy()
-            score = objective(model, cloud[::2], pose)
-            info = {**info, "score": score, "initial_score": seed_cost}
+            previous_pose = next(np.asarray(row["pose_estimee"], float) for row in reversed(rows) if row["status"] == "ajoute")
+            pose, initial, info, _ = estimate_pose(cloud, reference_points, previous_pose)
             fit = quality(cloud, reference_points, pose)
-            shift = float(np.linalg.norm(pose[:2] - seed[:2]))
-            turn = abs(wrap(pose[2] - seed[2]))
             # An unrelated or severely mismatched scan must not corrupt the map.
-            accepted_here = fit["within_30cm"] >= .32 and score <= .11 and shift <= 1.5 and turn <= 35
-            reason = "recouvrement et ecart a l'initialisation acceptes" if accepted_here else "recouvrement insuffisant ou pose trop eloignee de l'initialisation"
+            accepted_here = fit["within_30cm"] >= .32 and info["score"] <= .11
+            reason = "recouvrement et score acceptes" if accepted_here else "recouvrement ou score insuffisant"
+        try:
+            source_name = str(path.relative_to(REPO))
+        except ValueError:
+            source_name = str(path)
         row = {
-            "scan": name, "source": str(path.relative_to(REPO)).replace("\\", "/"),
-            "points": len(cloud), "pose_initiale": seed.tolist(), "pose_estimee": pose.tolist(),
+            "scan": name, "source": source_name.replace("\\", "/"),
+            "points": len(cloud), "pose_initiale": initial.tolist(), "pose_estimee": pose.tolist(),
             "status": "ajoute" if accepted_here else "ecarte", "reason": reason,
-            "height_m": 1.90, "height_source": "declaration utilisateur ou protocole A/B, non mesuree par le LiDAR",
+            "height_m": 1.90 if default_dataset else None,
+            "height_source": "declaration utilisateur ou protocole A/B, non mesuree par le LiDAR" if default_dataset else "a renseigner par l'operateur",
             "quality": fit, "matching": info, "seconds": time.perf_counter() - t0,
         }
         if accepted_here:
+            expand_grid(grid, cloud, pose)
             grid.update(cloud, pose)
             vector.update(cloud, pose, clear_crossed=False)
             world = apply_pose(cloud, *pose)
             accepted.append(world)
             fused.append((name, cloud, world))
-            draw_map(grid, rows + [row], OUT / f"etape_{len(fused):02d}.png", f"Etape {len(fused)} : ajout de {name}")
-            snapshots.append(grid.cells.copy())
+            draw_map(grid, rows + [row], out / f"etape_{len(fused):02d}.png", f"Etape {len(fused)} : ajout de {name}")
+            snapshots.append((grid.cells.copy(), grid.extent.copy()))
         rows.append(row)
         print(f"{name}: {row['status']}, pose={np.round(pose, 3)}, score={info['score']:.4f}, recouvrement={fit['within_30cm']}", flush=True)
-    grid.export(OUT / "grid_map")
-    vector.export(OUT / "carte_vectorielle.csv")
+    grid.export(out / "grid_map")
+    vector.export(out / "carte_vectorielle.csv")
     # A second, explicitly provisional map shows what the rejected scan would add.
     # It does not replace the quality-controlled main result.
     rejected = [row for row in rows if row["status"] == "ecarte"]
@@ -174,36 +213,39 @@ def run():
         exploratory_vector = copy.deepcopy(vector)
         exploratory_clouds = [(name, world) for name, _, world in fused]
         for row in rejected:
-            cloud = next(item[2] for item in items if item[0] == row["scan"])
+            cloud = loaded[row["scan"]]
             pose = row["pose_estimee"]
+            expand_grid(exploratory_grid, cloud, pose)
             exploratory_grid.update(cloud, pose)
             exploratory_vector.update(cloud, pose, clear_crossed=False)
             exploratory_clouds.append((row["scan"], apply_pose(cloud, *pose)))
-        exploratory_grid.export(OUT / "grid_map_exploratoire")
-        exploratory_vector.export(OUT / "carte_vectorielle_exploratoire.csv")
+        exploratory_grid.export(out / "grid_map_exploratoire")
+        exploratory_vector.export(out / "carte_vectorielle_exploratoire.csv")
         exploratory_rows = [{**row, "status": "ajoute"} for row in rows]
-        draw_map(exploratory_grid, exploratory_rows, OUT / "carte_exploratoire.png",
+        draw_map(exploratory_grid, exploratory_rows, out / "carte_exploratoire.png",
                  "Carte exploratoire : scans écartés ajoutés sans garantie", segments=exploratory_vector.features,
                  clouds=exploratory_clouds)
-    with (OUT / "points_fusionnes.csv").open("w", encoding="utf-8-sig", newline="") as f:
+    with (out / "points_fusionnes.csv").open("w", encoding="utf-8-sig", newline="") as f:
         writer = csv.writer(f, delimiter=";")
         writer.writerow(["scan", "x_local_m", "y_local_m", "x_carte_m", "y_carte_m"])
         for name, cloud, world in fused:
             writer.writerows((name, *local, *global_point) for local, global_point in zip(cloud, world))
-    with (OUT / "poses_et_qualite.csv").open("w", encoding="utf-8-sig", newline="") as f:
+    with (out / "poses_et_qualite.csv").open("w", encoding="utf-8-sig", newline="") as f:
         writer = csv.writer(f, delimiter=";")
         writer.writerow(["scan", "statut", "x_m", "y_m", "angle_deg", "recouvrement_20cm", "recouvrement_30cm", "score", "temps_s"])
         for row in rows:
             writer.writerow([row["scan"], row["status"], *row["pose_estimee"], row["quality"]["within_20cm"], row["quality"]["within_30cm"], row["matching"]["score"], row["seconds"]])
-    (OUT / "diagnostic.json").write_text(json.dumps({"method": "scan_coarse_icp sur nuage global croissant", "initial_pose_source": "estimations TP1/TP2", "accepted": len(fused), "total": len(items), "grid_resolution_m": grid.resolution, "grid_extent_m": grid.extent, "vector_segments": len(vector.features), "exploratory_map": bool(rejected), "scans": rows, "ground_truth_available": False, "excluded_other_scans": "N1,N2,N3,N5,N6: hauteur estimee 1,00-1,20 m; N4: sol"}, indent=2, ensure_ascii=False), encoding="utf-8")
-    draw_map(grid, rows, OUT / "carte_finale.png", f"TP3 : carte progressive ({len(fused)}/{len(items)} scans ajoutes)", segments=vector.features, clouds=[(n, w) for n, _, w in fused])
-    fig, axes = plt.subplots(2, 5, figsize=(18, 8), constrained_layout=True)
+    (out / "diagnostic.json").write_text(json.dumps({"method": "scan_coarse_icp sur nuage global croissant", "initial_pose_source": "pose precedente et centres de nuages, sans poses TP1/TP2 sauvegardees", "accepted": len(fused), "total": len(items), "grid_resolution_m": grid.resolution, "grid_extent_m": grid.extent, "vector_segments": len(vector.features), "exploratory_map": bool(rejected), "scans": rows, "ground_truth_available": False, "excluded_other_scans": "N1,N2,N3,N5,N6: hauteur estimee 1,00-1,20 m; N4: sol" if default_dataset else None}, indent=2, ensure_ascii=False), encoding="utf-8")
+    draw_map(grid, rows, out / "carte_finale.png", f"TP3 : carte progressive ({len(fused)}/{len(items)} scans ajoutes)", segments=vector.features, clouds=[(n, w) for n, _, w in fused])
+    nrows = (len(snapshots) + 4) // 5
+    fig, axes = plt.subplots(nrows, 5, figsize=(18, 4 * nrows), constrained_layout=True)
+    axes = np.asarray(axes).reshape(-1)
     occupied_y, occupied_x = np.where(grid.cells == 100)
     crop_low = grid.origin + np.array([occupied_x.min(), occupied_y.min()]) * grid.resolution - .7
     crop_high = grid.origin + np.array([occupied_x.max() + 1, occupied_y.max() + 1]) * grid.resolution + .7
-    for ax, snapshot, row in zip(axes.flat, snapshots, [r for r in rows if r["status"] == "ajoute"]):
+    for ax, (snapshot, snapshot_extent), row in zip(axes.flat, snapshots, [r for r in rows if r["status"] == "ajoute"]):
         pixels = np.where(snapshot == -1, 0, np.where(snapshot == 0, 1, 2))
-        ax.imshow(pixels, origin="lower", extent=grid.extent, cmap=ListedColormap(["white", "#e8f1e3", "#664630"]), vmin=0, vmax=2)
+        ax.imshow(pixels, origin="lower", extent=snapshot_extent, cmap=ListedColormap(["white", "#e8f1e3", "#664630"]), vmin=0, vmax=2)
         ax.set_title(row["scan"])
         ax.set_aspect("equal")
         ax.set_xlim(crop_low[0], crop_high[0])
@@ -211,10 +253,18 @@ def run():
     for ax in axes.flat[len(snapshots):]:
         ax.axis("off")
     fig.suptitle("Construction progressive de la grid map")
-    fig.savefig(OUT / "progression.png", dpi=150)
+    fig.savefig(out / "progression.png", dpi=150)
     plt.close(fig)
     return rows
 
 
 if __name__ == "__main__":
-    run()
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--scans", nargs="+", type=Path, help="CSV dans l'ordre de prise ; le premier fixe l'origine")
+    parser.add_argument("--output", type=Path, help="Dossier de résultats (pour des scans personnels)")
+    args = parser.parse_args()
+    if args.scans:
+        sources = [(f"S{i:02d}_{path.stem}", path) for i, path in enumerate(args.scans, 1)]
+        run(sources, args.output or ROOT / "resultats_personnalises")
+    else:
+        run(out=args.output or OUT)

@@ -48,6 +48,8 @@ Depuis la racine du depot :
 python -m pip install -r tp1/LD06_Atelier/requirements.txt
 python -m unittest discover -s tp1/LD06_Atelier -p "test_*.py" -v
 python -m unittest discover -s tp2 -p "test_*.py" -v
+python -m unittest discover -s tp3 -p "test_*.py" -v
+python tp3/slam.py
 python tp2/evaluer.py
 python tp2/evaluer_nouveaux_scans.py
 python tp2/creer_rapport.py

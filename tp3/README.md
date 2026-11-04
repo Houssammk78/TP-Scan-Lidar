@@ -1,11 +1,14 @@
 # TP3 — localisation et cartographie simultanées (début de SLAM)
 
-Ce dossier contient une intégration **hors ligne** des outils du TP1 et du TP2.
-Après chaque localisation, le scan est ajouté à la grid map et à la carte
+Ce dossier contient un **rejeu incrémental** des outils du TP1 et du TP2.
+Chaque scan est localisé par rapport aux scans déjà intégrés, puis ajouté à la grid map et à la carte
 vectorielle. La séquence utilise les quatre scans TP1 et les trois tours des
 positions A et B du TP2 (dix scans candidats, hauteur annoncée de 1,90 m).
-Le scan TP1 n° 3 fixe le repère. Les poses initiales viennent des estimations
-TP1 et TP2 ; elles ne constituent pas une vérité terrain mesurée.
+Le scan TP1 n° 1 fixe le repère. Les scans sont rejoués dans leur ordre
+d'acquisition. Les poses suivantes sont calculées sans lire
+les poses sauvegardées des TP1 et TP2. Le programme essaie la dernière pose
+estimée et quatre hypothèses construites avec les centres des nuages.
+La grille grandit uniquement après l'arrivée d'un scan accepté.
 
 ## Exécution
 
@@ -15,7 +18,19 @@ Depuis la racine du dépôt :
 python -m pip install -r tp1/LD06_Atelier/requirements.txt
 python tp3/slam.py
 python tp3/creer_rapport.py
+python -m unittest discover -s tp3 -p "test_*.py" -v
 ```
+
+Pour une nouvelle séquence de CSV LD06 à la même hauteur, dans l'ordre de prise :
+
+```powershell
+python tp3/slam.py --scans chemin/scan_A.csv chemin/scan_B.csv chemin/scan_C.csv
+```
+
+Le premier scan fixe l'origine ; les sorties sont dans
+`tp3/resultats_personnalises/`. L'option `--output DOSSIER` change ce dossier.
+Ce mode rejoue les fichiers séquentiellement ; il n'assure pas à lui seul la
+lecture directe du port série ni la conduite du robot.
 
 Pour compiler le rapport, lancer `tectonic rapport_tp3.tex` depuis
 `tp3/rapport` (ou un autre compilateur LaTeX compatible). Les fichiers
