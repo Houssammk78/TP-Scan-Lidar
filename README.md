@@ -23,6 +23,12 @@ En simulation : 60 essais par methode, tous reussis sur la scene simulee choisie
 avec seuils de 20 cm et 5 degres. Les scans reels n'ont pas de poses
 terrain mesurees : leurs erreurs physiques et incertitudes ne sont pas inventees.
 
+## Visualiseur des scans CSV
+
+Ouvrir [l'atelier LiDAR en HTML](simulateur_html/index.html) dans un navigateur.
+Glisser les scans CSV du LD06 pour afficher la pièce, estimer leur alignement,
+corriger les poses et exporter le plan PNG et les points fusionnés.
+
 ## Installation et tests
 
 Depuis la racine du depot :
