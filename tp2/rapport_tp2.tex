@@ -281,6 +281,30 @@ Recherche + ICP & -0,890 & -0,030 & -1,00 \\
 \bottomrule\end{tabular}
 \end{center}
 Il s'agit d'estimations des algorithmes, pas de mesures physiques.
+\subsection{Positions relatives estimées pour les six tours A/B}
+Depuis le départ nul, la médiane des trois méthodes donne une synthèse
+des cinq scans tests dans le repère de A\_01. A\_01 est fixé à l'origine
+par convention. La dernière colonne de chaque type est le plus grand
+écart \emph{entre méthodes} pour un même scan ; elle décrit leur désaccord
+interne et ne constitue pas une incertitude de mesure physique.
+\begin{center}\footnotesize\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lrrrrr}\toprule
+Scan & $\hat x$ (m) & $\hat y$ (m) & $\hat\theta$ ($^\circ$) &
+Écart pos. (m) & Écart ang. ($^\circ$)\\\midrule
+A\_01 & 0,000 & 0,000 & 0,00 & --- & --- \\
+A\_02 & 0,000 & 0,001 & -0,25 & 0,012 & 0,08 \\
+A\_03 & 0,000 & 0,000 & -0,25 & 0,020 & 0,08 \\
+B\_01 & -0,890 & -0,040 & -1,00 & 0,022 & 0,25 \\
+B\_02 & -0,890 & -0,040 & -0,75 & 0,045 & 0,25 \\
+B\_03 & -0,890 & -0,030 & -1,00 & 0,036 & 0,25 \\
+\bottomrule\end{tabular}
+\end{center}
+Ces chiffres sont recalculés depuis \texttt{resultats/essais.csv} et
+exportés dans \path{resultats/poses_estimees_csv.csv}. Les acquisitions
+B se groupent autour de $x\approx-0{,}89$ m, $y\approx-0{,}04$ m et
+$\theta\approx-1^\circ$ relativement à A\_01. Cette proximité entre
+estimations ne valide pas la position réelle du capteur. La pose N2--N5
+présentée plus loin reste ambiguë et n'est pas assimilée à ce groupe A/B.
 La répétabilité entre acquisitions du même emplacement supposé est :
 \begin{center}\small
 \begin{tabular}{llrrrrr}\toprule

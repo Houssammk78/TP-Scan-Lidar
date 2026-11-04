@@ -1,4 +1,4 @@
-# Travaux pratiques LiDAR - EIGSI La Rochelle
+# Travaux pratiques LiDAR - EIGSI
 
 **Houssam MAKHLOUK - Annee universitaire 2026/2027**
 
@@ -7,6 +7,9 @@
 - [Rapport PDF](tp1/rapport_tp1.pdf) et [source LaTeX](tp1/rapport_tp1.tex).
 - [Guide du TP1](tp1/README.md).
 - [Donnees et cartes des quatre scans](tp1/TP1_4_scans).
+- [Grid map finale PNG](tp1/TP1_4_scans/resultats/grid_map_finale.png),
+  [carte vectorielle PNG](tp1/TP1_4_scans/resultats/carte_vectorielle.png)
+  et [dimensions visibles estimees](tp1/TP1_4_scans/resultats/dimensions_estimees.json).
 - [Code et tests](tp1/LD06_Atelier).
 
 ## TP2 : localisation et scan matching
@@ -16,6 +19,7 @@
 - [Réponses aux consignes, question par question](tp2/REPONSES_CONSIGNES.md).
 - [Scans A/B et six acquisitions supplémentaires](tp2/acquisitions).
 - [Resultats des 255 essais](tp2/resultats).
+- [Poses A/B estimees depuis les CSV](tp2/resultats/poses_estimees_csv.csv).
 - [Diagnostics et 18 essais sur les nouveaux scans](tp2/resultats_nouveaux_scans).
 
 Une methode pour chacun des trois supports : grille, segments et scan de reference.

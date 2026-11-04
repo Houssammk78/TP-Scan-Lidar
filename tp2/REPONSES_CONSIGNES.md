@@ -85,6 +85,16 @@ géométrique seul ne prouve pas la bonne localisation physique.
 
 ## 5. Erreur, réussite, temps et incertitude
 
+**Poses A/B estimées depuis les CSV.** Le fichier
+`resultats/poses_estimees_csv.csv` résume, pour chaque scan réel A/B, la
+médiane des trois méthodes depuis la même pose initiale nulle. A_02 et A_03
+restent près de l'origine ; B_01, B_02 et B_03 se placent autour de
+**(-0,89 m ; -0,04 m ; -1°)** dans le repère de A_01. Le plus grand désaccord
+entre méthodes sur les trois scans B est de 4,5 cm et 0,25°. Cette dispersion
+interne ne représente pas une incertitude de mesure physique. Pour N2–N5,
+les solutions divergent davantage ; aucune pose unique ne peut être retenue
+comme référence réelle.
+
 **Seuils.** Un essai est réussi si l'erreur de position est au plus 0,20 m
 **et** l'erreur angulaire au plus 5°. En simulation, les poses vraies sont
 connues par construction : les erreurs et les taux de réussite ci-dessus

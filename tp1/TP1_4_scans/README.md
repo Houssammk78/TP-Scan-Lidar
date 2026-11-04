@@ -46,6 +46,11 @@ Les resultats principaux sont dans resultats/ :
 - grilles_individuelles.png et vectorielles_individuelles.png : quatre vues locales.
 - grid_scanN.* et vectorielle_scanN.* : exports individuels.
 - alignement.json : mesures de coherence du recalage.
+- dimensions_estimees.json : emprise calculée des impacts des scans 3 et 4,
+  X de -1,18 à 9,00 m et Y de -7,06 à 6,05 m, soit environ 10,17 × 13,11 m
+  quand on soustrait les bornes non arrondies.
+  Cette emprise est une estimation des surfaces observées, pas une mesure
+  indépendante de la longueur et de la largeur de la salle.
 
 ## Recalage et limites importantes
 

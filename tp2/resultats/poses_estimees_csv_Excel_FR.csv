@@ -1,0 +1,7 @@
+﻿scan;x_estime_m;y_estime_m;angle_estime_deg;ecart_methodes_position_m;ecart_methodes_angle_deg;statut
+A_01;0,0;0,0;0,0;;;repere fixe
+A_02;0,0;0,0006394624864247986;-0,25;0,011554924887036465;0,07555496252592775;estimation CSV, non mesuree
+A_03;0,0;-0,00024036317034102904;-0,25;0,02;0,08310691739677623;estimation CSV, non mesuree
+B_01;-0,89;-0,04;-1,0;0,022360679774997914;0,25;estimation CSV, non mesuree
+B_02;-0,89;-0,04;-0,75;0,04472135954999583;0,25;estimation CSV, non mesuree
+B_03;-0,89;-0,03;-1,0;0,03605551275463992;0,25;estimation CSV, non mesuree

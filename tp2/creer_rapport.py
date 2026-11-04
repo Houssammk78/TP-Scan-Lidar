@@ -1,6 +1,7 @@
 """Régénère le rapport depuis les résultats, sans chiffres figés dans le texte."""
 import csv
 import json
+import math
 import statistics
 from pathlib import Path
 
@@ -15,7 +16,12 @@ def read_csv(name):
 
 
 def fmt(value, digits=2):
-    return "---" if value is None or value == "" else f"{float(value):.{digits}f}".replace(".", ",")
+    if value is None or value == "":
+        return "---"
+    number = float(value)
+    if abs(number) < 0.5 * 10 ** (-digits):
+        number = 0.0
+    return f"{number:.{digits}f}".replace(".", ",")
 
 
 def percent(value):
@@ -32,6 +38,46 @@ simulation = [item for item in summary if item["dataset"] == "simulation"]
 real = [item for item in summary if item["dataset"] == "reel"]
 trials = read_csv("essais.csv")
 repeatability = read_csv("repetabilite_reelle.csv")
+
+
+def estimated_real_poses():
+    """Synthèse descriptive des sorties des trois solveurs, sans vérité terrain."""
+    rows = [dict(scan="A_01", x_estime_m=0.0, y_estime_m=0.0,
+                 angle_estime_deg=0.0, ecart_methodes_position_m=None,
+                 ecart_methodes_angle_deg=None, statut="repere fixe")]
+    labels = ("A_02", "A_03", "B_01", "B_02", "B_03")
+    for label in labels:
+        selected = [row for row in trials if row["dataset"] == "reel"
+                    and row["scan"] == label and row["trial"] == "0"]
+        if len(selected) != len(LABELS) or {row["method"] for row in selected} != set(LABELS):
+            raise ValueError(f"Trois méthodes manquantes pour {label}, départ nul")
+        poses = [(float(row["estimated_x"]), float(row["estimated_y"]),
+                  float(row["estimated_angle"])) for row in selected]
+        position_spread = max(math.hypot(a[0] - b[0], a[1] - b[1])
+                              for a in poses for b in poses)
+        angle_spread = max(abs((a[2] - b[2] + 180) % 360 - 180)
+                           for a in poses for b in poses)
+        rows.append(dict(scan=label,
+                         x_estime_m=statistics.median(p[0] for p in poses),
+                         y_estime_m=statistics.median(p[1] for p in poses),
+                         angle_estime_deg=statistics.median(p[2] for p in poses),
+                         ecart_methodes_position_m=position_spread,
+                         ecart_methodes_angle_deg=angle_spread,
+                         statut="estimation CSV, non mesuree"))
+    return rows
+
+
+estimated_poses = estimated_real_poses()
+for excel in (False, True):
+    suffix = "_Excel_FR" if excel else ""
+    with (OUT / f"poses_estimees_csv{suffix}.csv").open(
+            "w", encoding="utf-8-sig", newline="") as file:
+        writer = csv.DictWriter(file, fieldnames=list(estimated_poses[0]), delimiter=";")
+        writer.writeheader()
+        for row in estimated_poses:
+            writer.writerow({key: ("" if value is None else
+                                   str(value).replace(".", ",") if excel and isinstance(value, float)
+                                   else value) for key, value in row.items()})
 
 
 def table(lines):
@@ -72,6 +118,13 @@ b01_rows = table(
     f"{LABELS[item['method']]} & {fmt(item['estimated_x'], 3)} & "
     f"{fmt(item['estimated_y'], 3)} & {fmt(item['estimated_angle'], 2)} \\\\"
     for item in trials if item["dataset"] == "reel" and item["scan"] == "B_01" and item["trial"] == "0"
+)
+estimated_pose_rows = table(
+    f"{latex_name(item['scan'])} & {fmt(item['x_estime_m'], 3)} & "
+    f"{fmt(item['y_estime_m'], 3)} & {fmt(item['angle_estime_deg'], 2)} & "
+    f"{fmt(item['ecart_methodes_position_m'], 3)} & "
+    f"{fmt(item['ecart_methodes_angle_deg'], 2)} \\\\"
+    for item in estimated_poses
 )
 repeat_rows = table(
     f"{LABELS[item['method']]} & {item['position']} & {fmt(item['mean_x_m'], 3)} & "
@@ -526,6 +579,25 @@ Depuis le départ nul, les poses estimées de B\_01 sont :
 \bottomrule\end{tabular}
 \end{center}
 Il s'agit d'estimations des algorithmes, pas de mesures physiques.
+\subsection{Positions relatives estimées pour les six tours A/B}
+Depuis le départ nul, la médiane des trois méthodes donne une synthèse
+des cinq scans tests dans le repère de A\_01. A\_01 est fixé à l'origine
+par convention. La dernière colonne de chaque type est le plus grand
+écart \emph{entre méthodes} pour un même scan ; elle décrit leur désaccord
+interne et ne constitue pas une incertitude de mesure physique.
+\begin{center}\footnotesize\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lrrrrr}\toprule
+Scan & $\hat x$ (m) & $\hat y$ (m) & $\hat\theta$ ($^\circ$) &
+Écart pos. (m) & Écart ang. ($^\circ$)\\\midrule
+@@ESTIMATEDPOSES@@
+\bottomrule\end{tabular}
+\end{center}
+Ces chiffres sont recalculés depuis \texttt{resultats/essais.csv} et
+exportés dans \path{resultats/poses_estimees_csv.csv}. Les acquisitions
+B se groupent autour de $x\approx-0{,}89$ m, $y\approx-0{,}04$ m et
+$\theta\approx-1^\circ$ relativement à A\_01. Cette proximité entre
+estimations ne valide pas la position réelle du capteur. La pose N2--N5
+présentée plus loin reste ambiguë et n'est pas assimilée à ce groupe A/B.
 La répétabilité entre acquisitions du même emplacement supposé est :
 \begin{center}\small
 \begin{tabular}{llrrrrr}\toprule
@@ -607,6 +679,7 @@ for marker, value in {
     "@@GROUNDTEXT@@": ground_text,
     "@@MEASUREDTABLE@@": measurement_table,
     "@@B01TABLE@@": b01_rows,
+    "@@ESTIMATEDPOSES@@": estimated_pose_rows,
     "@@REPEATTABLE@@": repeat_rows,
     "@@OLDSCANS@@": old_scan_rows,
     "@@BUILDTIMES@@": build_rows,

@@ -59,6 +59,12 @@ lorsqu'une pose de référence indépendante est connue. Les seuils de réussite
 sont 0,20 m **et** 5°. Les temps de préparation des références et ceux des
 solveurs sont séparés dans le CSV.
 
+La [synthèse des poses estimées](resultats/poses_estimees_csv.csv) donne,
+depuis le départ nul, la médiane des trois méthodes pour A_02, A_03 et
+B_01 à B_03. Les trois scans B se placent près de
+(-0,89 m ; -0,04 m ; -1°) par rapport à A_01. Les écarts entre méthodes
+sont indiqués séparément et ne mesurent pas l'incertitude physique.
+
 Les acquisitions réelles n'ont pas de déplacement, angle et incertitude
 mesurés indépendamment. Les colonnes d'erreur et de réussite réelles restent
 vides ; un faible résidu ou un accord entre méthodes ne prouve pas la justesse
@@ -67,9 +73,10 @@ permet de compléter ces mesures. Pour chaque scan de test, saisir la pose
 relative à A_01 et les deux incertitudes :
 
     scan;x_m;y_m;angle_deg;uncertainty_position_m;uncertainty_angle_deg
-    B_01;-0,90;0,00;0,00;0,05;2,00
+    B_01;<x mesure>;<y mesure>;<angle mesure>;<incertitude position>;<incertitude angle>
 
-Cette ligne n'est qu'un **exemple de format**, pas une mesure du projet.
+Cette ligne est un **gabarit**, pas une mesure du projet : ne la copier qu'après
+avoir remplacé les cinq champs par des valeurs relevées sur place.
 Les champs vides sont ignorés. Une ligne partiellement remplie est rejetée.
 Après mesures, relancer la commande :
 

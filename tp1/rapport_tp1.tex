@@ -117,6 +117,19 @@ La rotation est libre : une hypothèse antérieure d'orientation identique donna
 \end{table}
 Les nouveaux scans se correspondent très bien sur les surfaces observées. Le scan 1 se superpose partiellement ; le scan 2 reste moins fiable. Une proportion faible peut refléter des occultations, des objets déplacés, des différences de scène ou un mauvais recalage. Sans positions de référence mesurées, on ne peut pas convertir ces indicateurs en précision réelle de localisation.
 
+\subsection{Dimensions visibles estimées depuis les CSV}
+Les scans 3 et 4, dont les impacts se superposent à environ 99\,\% à moins de
+20 cm, servent à décrire l'emprise principale observée sans les extensions
+isolées du scan 2. Les bornes des points alignés sont $x\in[-1{,}18;9{,}00]$ m
+et $y\in[-7{,}06;6{,}05]$ m, soit environ \textbf{10,17 m selon X et
+13,11 m selon Y}. Le calcul est enregistré dans
+\texttt{resultats/dimensions\_estimees.json} et reproduit par
+\texttt{generer.py}. Ces valeurs sont l'emprise des impacts visibles au niveau
+du LiDAR, et non une mesure indépendante de la longueur et de la largeur des
+murs : occultations, ouvertures et erreurs de recalage peuvent modifier les
+limites observées. Les dimensions de la grille, qui incluent une marge et les
+quatre scans, ne doivent pas être interprétées comme celles de la salle.
+
 \section{Construction et mise à jour de la carte d'occupation}
 \subsection{Structure et indices}
 La grille est initialement inconnue. Sa résolution est $\rho=0{,}05$ m ; son emprise couvre les points valides transformés et les origines des capteurs, avec une marge de 0,50 m. Elle contient 288 lignes et 270 colonnes, soit 77\,760 cellules. Le stockage est un tableau \texttt{int16}, soit 155\,520 octets pour les états seuls.

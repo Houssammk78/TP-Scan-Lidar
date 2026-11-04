@@ -45,6 +45,17 @@ def main():
   pts=apply_pose(c,*p);global_clouds.append(pts);ax.scatter(*pts.T,s=8,c=col,label=f'Scan {i} ({len(c)} points)');ax.plot(*p[:2],'+',c=col,ms=12)
  ax.set(xlabel='X (m)',ylabel='Y (m)',title='Fusion de quatre scans - recalage estime',aspect='equal');ax.grid(alpha=.2);ax.legend();fig.tight_layout();fig.savefig(OUT/'fusion_4_scans.png',dpi=170);plt.close(fig)
  allpoints=np.vstack(global_clouds)
+ # Scans 3 et 4 couvrent la meme enveloppe avec un fort recouvrement.
+ # Ces bornes de points ne sont pas une mesure physique des murs.
+ stable=np.vstack(global_clouds[2:4]);low=stable.min(axis=0);high=stable.max(axis=0)
+ (OUT/'dimensions_estimees.json').write_text(json.dumps({
+  'source_scans':['scan3.csv','scan4.csv'],
+  'method':'bornes min/max des impacts alignes des scans 3 et 4',
+  'x_min_m':float(low[0]),'x_max_m':float(high[0]),
+  'y_min_m':float(low[1]),'y_max_m':float(high[1]),
+  'extent_x_m':float(high[0]-low[0]),'extent_y_m':float(high[1]-low[1]),
+  'note':'Emprise observee et estimee ; pas une mesure terrain independante.'
+ },indent=2,ensure_ascii=False),encoding='utf-8')
  with (OUT/'fusion_4_scans.csv').open('w',encoding='utf-8-sig',newline='') as f:
   w=csv.writer(f,delimiter=';');w.writerow(['scan','point_index','angle_deg_local','dist_mm_local','intensity','x_local_mm','y_local_mm','x_corrige_mm','y_corrige_mm'])
   for i,(file,pts) in enumerate(zip([ROOT/'data'/f'scan{i}.csv' for i in range(1,5)],global_clouds),1):

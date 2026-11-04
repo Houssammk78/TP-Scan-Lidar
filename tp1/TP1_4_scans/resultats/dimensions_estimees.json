@@ -1,0 +1,14 @@
+{
+  "source_scans": [
+    "scan3.csv",
+    "scan4.csv"
+  ],
+  "method": "bornes min/max des impacts alignes des scans 3 et 4",
+  "x_min_m": -1.1759968767218036,
+  "x_max_m": 8.996,
+  "y_min_m": -7.064852845379014,
+  "y_max_m": 6.0480739015287055,
+  "extent_x_m": 10.171996876721805,
+  "extent_y_m": 13.11292674690772,
+  "note": "Emprise observee et estimee ; pas une mesure terrain independante."
+}
