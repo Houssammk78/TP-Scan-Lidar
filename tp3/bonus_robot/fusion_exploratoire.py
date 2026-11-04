@@ -118,13 +118,15 @@ def run(out=ROOT / "resultats_rejeu"):
             ax.annotate(str(index + 1), (row["x_m"], row["y_m"]), fontsize=7,
                         color=palette(index), weight="bold")
     ax.set(xlabel="X du TP3 antérieur (m)", ylabel="Y du TP3 antérieur (m)",
-           title="Bonus robot : regroupement exploratoire des sous-cartes")
+           title="Résultat final du TP3 — regroupement estimé")
     ax.set_aspect("equal", adjustable="box")
     ax.set_xlim(extent[0] - .4, extent[1] + .4)
     ax.set_ylim(extent[2] - .4, extent[3] + .4)
     ax.grid(alpha=.16)
     ax.legend(loc="center left", bbox_to_anchor=(1.01, .5), fontsize=7, title="Sous-carte / statut")
-    fig.savefig(out / "carte_regroupee_exploratoire.png", dpi=175)
+    final_image = REPO / "tp3" / "resultats" / "resultat_final.png"
+    final_image.parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(final_image, dpi=175)
     plt.close(fig)
     return rows
 

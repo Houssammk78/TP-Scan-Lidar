@@ -40,6 +40,8 @@ livrés sont le [PDF](rapport/rapport_tp3.pdf) et la
 
 ## Résultats
 
+- [Résultat final estimé](resultats/resultat_final.png) : regroupement des
+  acquisitions du robot avec repères et raccords exploratoires.
 - [Partie SLAM illustrée](SLAM.md) : méthode et figures de recalage et progression.
 - [Recalage d'un scan](resultats/slam_recalage_scan3.png) et
   [progression des nuages](resultats/slam_progression_nuages.png).
@@ -69,7 +71,7 @@ géométrique absolue ne peuvent donc pas être certifiées avec ces CSV seuls.
 
 Le [dossier bonus](bonus_robot/README.md) contient les CSV acquis avec le robot,
 le rejeu avec 117 scans distincts, les cartes de séquences localement recalées
-et une [vue regroupée exploratoire](bonus_robot/resultats_rejeu/carte_regroupee_exploratoire.png).
+et un [résultat final estimé](resultats/resultat_final.png).
 Un programme de pilotage automatique limité par impulsions est également fourni. Le firmware
 arrête les lectures LiDAR pendant le mouvement ; la carte est donc mise à jour
 après chaque arrêt, lorsque le capteur a produit un scan frais. Le mode direct

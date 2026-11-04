@@ -30,7 +30,7 @@ est la plus longue séquence continue de ce lot : 25 scans acceptés sur 31.
 
 Les 13 sous-cartes ont aussi été recalées **indépendamment** sur la
 [carte exploratoire TP3 antérieure](../resultats/carte_exploratoire.png) par
-recherche grossière de pose puis ICP. Le résultat est une [vue regroupée](resultats_rejeu/carte_regroupee_exploratoire.png)
+recherche grossière de pose puis ICP. Le [résultat final estimé](../../resultats/resultat_final.png)
 semblable à une carte de salle, et non une preuve que les 13 poses sont justes.
 Avec les seuils indicatifs de 35 % des cellules occupées à moins de 30 cm et un
 score au plus égal à 0,12 m², **six raccords sont plausibles et sept restent

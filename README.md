@@ -35,6 +35,7 @@ corriger les poses et exporter le plan PNG et les points fusionnés.
 
 ## TP3 : intégration SLAM et carte de la salle
 
+- [Résultat final estimé](tp3/resultats/resultat_final.png) : carte regroupée du robot.
 - [Partie SLAM illustrée](tp3/SLAM.md).
 - [Rapport PDF](tp3/rapport/rapport_tp3.pdf) et [source LaTeX](tp3/rapport/rapport_tp3.tex).
 - [Guide et limites](tp3/README.md).
@@ -42,7 +43,7 @@ corriger les poses et exporter le plan PNG et les points fusionnés.
 - [Grille, segments, poses et diagnostic](tp3/resultats).
 - [Bonus robot mobile : code, CSV acquis et sous-cartes](tp3/bonus_robot/README.md),
   avec [vue des sous-cartes](tp3/bonus_robot/resultats_rejeu/vue_sous_cartes.png)
-  et [regroupement exploratoire](tp3/bonus_robot/resultats_rejeu/carte_regroupee_exploratoire.png).
+  et [regroupement dans le résultat final](tp3/resultats/resultat_final.png).
 
 ## Installation et tests
 

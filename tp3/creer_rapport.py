@@ -275,7 +275,7 @@ antérieurs et ne mesure pas la seule couverture du robot mobile.
 """.replace("@@SUBMAPS@@", str(len(links["rows"]))).replace("@@PLAUSIBLE@@", str(plausible))
         grouped_figure = r"""
 \begin{figure}[H]\centering
-\includegraphics[width=.95\linewidth,height=.70\textheight,keepaspectratio]{../bonus_robot/resultats_rejeu/carte_regroupee_exploratoire.png}
+\includegraphics[width=.95\linewidth,height=.70\textheight,keepaspectratio]{../resultats/resultat_final.png}
 \caption{Regroupement exploratoire des sous-cartes du robot sur la carte TP3
 antérieure. Les couleurs vives indiquent les raccords plausibles selon le score
 choisi ; les points pâles indiquent les raccords incertains.}
