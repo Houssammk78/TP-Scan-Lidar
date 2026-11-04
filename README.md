@@ -2,6 +2,12 @@
 
 **Houssam MAKHLOUK - Annee universitaire 2026/2027**
 
+## Synthèse personnelle du module
+
+- [Conclusion personnelle en PDF](livrable/conclusion_personnelle.pdf) et
+  [source LaTeX](livrable/conclusion_personnelle.tex) : outils, figures, résultats,
+  choix techniques, limites, rôle des documentations du professeur et bilan personnel.
+
 ## TP1 : extraction, visualisation et cartographie
 
 - [Rapport PDF](tp1/rapport_tp1.pdf) et [source LaTeX](tp1/rapport_tp1.tex).
