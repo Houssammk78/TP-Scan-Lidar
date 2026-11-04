@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LD06 · Scanner et enregistrer en CSV</title>
+  <style>
+    :root{color-scheme:dark;font-family:system-ui,Segoe UI,Arial,sans-serif}
+    *{box-sizing:border-box}
+    body{margin:0;background:#101925;color:#edf4ff;padding:22px}
+    main{max-width:1100px;margin:0 auto}
+    h1{margin:0 0 8px;font-size:1.8rem}
+    p{color:#c9d6e5;line-height:1.45}
+    .layout{display:grid;grid-template-columns:minmax(260px,390px) minmax(270px,1fr);gap:20px}
+    .panel{background:#1c2a3c;padding:20px;border:1px solid #36475e;border-radius:16px}
+    button{background:#347cbd;border:0;border-radius:10px;padding:12px 14px;margin:5px 5px 5px 0;color:white;font-size:15px;font-weight:650;cursor:pointer}
+    button.secondary{background:#39506c}button:disabled{opacity:.45;cursor:not-allowed}
+    .status{background:#142131;border-radius:10px;padding:12px;min-height:55px;margin:12px 0;white-space:pre-line}
+    .stat{padding:8px 0;border-bottom:1px solid #344258}
+    .stat strong{font-variant-numeric:tabular-nums;color:#88d5fa}
+    canvas{width:100%;height:auto;aspect-ratio:1/1;border-radius:9px;background:#101b2b}
+    code{color:#a0e0ff}
+    small{color:#a9bed4;line-height:1.4;display:block}
+    @media(max-width:750px){.layout{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<main>
+  <h1>LiDAR LD06 · acquisition & CSV</h1>
+  <p>Connecte le PC au Wi-Fi <b>RobotESP32</b>, garde le robot à l’arrêt, puis lance une capture. Cette page lit directement l’endpoint <code>http://192.168.4.1/scan</code> du programme ESP32.</p>
+  <div class="layout">
+    <section class="panel">
+      <h2>Capturer</h2>
+      <button id="single">Scanner une fois</button>
+      <button id="start" class="secondary">Démarrer (1 scan/s)</button>
+      <button id="stop" class="secondary" disabled>Arrêter</button>
+      <div class="status" id="status">Prêt. Connecte-toi à RobotESP32.</div>
+      <div class="stat">Scans enregistrés : <strong id="scans">0</strong></div>
+      <div class="stat">Points du dernier scan : <strong id="points">0</strong></div>
+      <div class="stat">Dernière capture : <strong id="date">—</strong></div>
+      <h2>Exporter</h2>
+      <button id="last" disabled>CSV du dernier scan</button>
+      <button id="all" disabled>CSV de tous les scans</button>
+      <button id="clear" class="secondary">Vider les scans</button>
+      <small>Colonnes CSV : <code>point_index, angle_deg, dist_mm, intensity, x_lib_mm, y_lib_mm</code>. Pour l’ensemble, s’ajoutent l’identifiant et l’horodatage de chaque scan.</small>
+      <p><small>Important : dans ton programme ESP32 actuel, l'acquisition LiDAR est suspendue pendant les commandes de mouvement. Capture les scans quand le robot est arrêté. Les mesures sont enregistrées sur le PC uniquement quand tu télécharges un CSV.</small></p>
+    </section>
+    <section class="panel">
+      <h2>Vue du dernier scan</h2>
+      <canvas id="plot" width="600" height="600" aria-label="Visualisation des points LiDAR"></canvas>
+      <p><small>Vue locale autour du capteur, dimensions en mètres. Elle ne constitue pas encore une carte globale du déplacement du robot.</small></p>
+    </section>
+  </div>
+</main>
+<script>
+'use strict';
+const BASE = 'http://192.168.4.1';
+const entries = [];
+let inFlight = false, running = false, timer = null;
+const $ = id => document.getElementById(id);
+const status = (message, error=false) => {
+  $('status').textContent=message;
+  $('status').style.color=error?'#ffaea9':'#baf5cb';
+};
+const HEAD = ['point_index','angle_deg','dist_mm','intensity','x_lib_mm','y_lib_mm'];
+function parseScan(buffer) {
+  const view=new DataView(buffer);
+  if(buffer.byteLength<8) throw new Error('Réponse trop courte du LiDAR');
+  const xpose=view.getInt16(0,true), ypose=view.getInt16(2,true);
+  const heading=view.getUint16(4,true)/100;
+  const n=view.getUint16(6,true);
+  if(n<1||n>460||buffer.byteLength!==8+5*n)
+    throw new Error(`Format binaire incorrect : ${n} points, ${buffer.byteLength} octets`);
+  const pts=[];
+  for(let i=0;i<n;i++){
+    const off=8+i*5;
+    const a=view.getUint16(off,true)/100;
+    const d=view.getUint16(off+2,true);
+    const intensity=view.getUint8(off+4);
+    const r=a*Math.PI/180;
+    pts.push([i,a.toFixed(2),d,intensity,Math.trunc(d*Math.cos(r)),Math.trunc(-d*Math.sin(r))]);
+  }
+  return {pose:[xpose,ypose,heading],pts};
+}
+function refresh() {
+  $('scans').textContent=entries.length;
+  $('points').textContent=entries.at(-1)?.pts.length||0;
+  $('date').textContent=entries.at(-1)?.stamp.toLocaleTimeString('fr-FR')||'—';
+  $('last').disabled=!entries.length;
+  $('all').disabled=!entries.length;
+  $('start').disabled=running;
+  $('stop').disabled=!running;
+}
+async function capture(){
+  if(inFlight)return;
+  inFlight=true;
+  try{
+    const url=BASE+'/scan?nocache='+Date.now();
+    const r=await fetch(url,{cache:'no-store'});
+    if(!r.ok){
+      let t='';try{t=await r.text()}catch(e){}
+      throw new Error(`HTTP ${r.status} ${t}`);
+    }
+    const decoded=parseScan(await r.arrayBuffer());
+    const stamp=new Date();
+    entries.push({scanId:entries.length+1,stamp,...decoded});
+    status(`${decoded.pts.length} points reçus. Scan n°${entries.length} enregistré en mémoire.\nClique sur CSV pour sauvegarder sur le PC.`);
+    refresh();draw(decoded.pts);
+  }catch(err){
+    status('Échec du scan : '+err.message+'\nVérifie le Wi-Fi RobotESP32 et /lidar_status. Si Chrome bloque la connexion locale, utilise le script Python fourni.',true);
+    if(running)stopAuto();
+  }finally{inFlight=false;}
+}
+function stopAuto(){running=false;clearInterval(timer);timer=null;refresh();}
+function startAuto(){
+  if(running)return;
+  running=true;refresh();capture();timer=setInterval(capture,1000);
+}
+function csvText(rows){
+  return '\ufeff'+rows.map(row=>row.map(v=>{
+    const s=String(v);
+    return /[",\r\n]/.test(s)?'"'+s.replaceAll('"','""')+'"':s;
+  }).join(',')).join('\r\n')+'\r\n';
+}
+function download(name, rows){
+  const blob=new Blob([csvText(rows)],{type:'text/csv;charset=utf-8;'});
+  const href=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=href;a.download=name;a.click();
+  setTimeout(()=>URL.revokeObjectURL(href),2000);
+}
+function stampName(d){
+  return d.getFullYear().toString()+String(d.getMonth()+1).padStart(2,'0')+
+    String(d.getDate()).padStart(2,'0')+'_'+String(d.getHours()).padStart(2,'0')+
+    String(d.getMinutes()).padStart(2,'0')+String(d.getSeconds()).padStart(2,'0');
+}
+function draw(pts=[]){
+  const c=$('plot'),ctx=c.getContext('2d'),w=c.width,h=c.height;
+  ctx.clearRect(0,0,w,h);ctx.fillStyle='#101b2b';ctx.fillRect(0,0,w,h);
+  const good=pts.filter(p=>p[2]>0);
+  const ds=good.map(p=>p[2]).sort((a,b)=>a-b);
+  const maxmm=Math.max(1000,Math.min(12000,ds[Math.floor(ds.length*.95)]||5000));
+  const scale=(w*.45)/maxmm,ox=w/2,oy=h/2;
+  ctx.strokeStyle='#28415b';ctx.lineWidth=1;
+  const step=maxmm<=3000?500:1000;
+  for(let mm=step;mm<=maxmm;mm+=step){
+    ctx.beginPath();ctx.arc(ox,oy,mm*scale,0,2*Math.PI);ctx.stroke();
+  }
+  ctx.strokeStyle='#6c7d93';ctx.beginPath();ctx.moveTo(0,oy);ctx.lineTo(w,oy);ctx.moveTo(ox,0);ctx.lineTo(ox,h);ctx.stroke();
+  ctx.fillStyle='#92caff';
+  for(const p of good){
+    const x=ox+p[4]*scale,y=oy+p[5]*scale;
+    if(x>=0&&x<w&&y>=0&&y<h)ctx.fillRect(x-1.5,y-1.5,3,3);
+  }
+  ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(ox,oy,5,0,Math.PI*2);ctx.fill();
+  ctx.font='15px Arial';ctx.fillStyle='#b1c2d9';
+  ctx.fillText(`Portée affichée : ${(maxmm/1000).toFixed(1)} m`,14,25);
+}
+$('single').addEventListener('click',capture);
+$('start').addEventListener('click',startAuto);
+$('stop').addEventListener('click',stopAuto);
+$('last').addEventListener('click',()=>{
+  const e=entries.at(-1);if(!e)return;
+  download('scan_'+stampName(e.stamp)+'.csv',[HEAD,...e.pts]);
+});
+$('all').addEventListener('click',()=>{
+  if(!entries.length)return;
+  const head=['scan_id','horodatage_pc',...HEAD,'pose_x','pose_y','pose_angle_deg'];
+  const rows=[head];
+  for(const e of entries){
+    for(const p of e.pts)rows.push([e.scanId,e.stamp.toISOString(),...p,...e.pose]);
+  }
+  download('tous_scans_ld06_'+stampName(new Date())+'.csv',rows);
+});
+$('clear').addEventListener('click',()=>{
+  if(!entries.length)return;
+  if(confirm('Effacer les scans non encore téléchargés ?')){
+    stopAuto();entries.length=0;refresh();draw();status('Mémoire des scans vidée.');
+  }
+});
+window.addEventListener('pagehide',stopAuto);
+draw();refresh();
+</script>
+</body>
+</html>

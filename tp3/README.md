@@ -64,4 +64,14 @@ ont une hauteur estimée de 1,00 à 1,20 m et N4 a été pris au sol.
 positions physiques des acquisitions et les dimensions de la salle n'ont pas
 été relevées indépendamment. La couverture de toute la salle et l'erreur
 géométrique absolue ne peuvent donc pas être certifiées avec ces CSV seuls.
-Le déplacement automatique du robot est un bonus non implémenté ici.
+
+## Bonus robot mobile
+
+Le [dossier bonus](bonus_robot/README.md) contient les CSV acquis avec le robot,
+le rejeu avec 117 scans distincts, les cartes de séquences localement recalées
+et un programme de pilotage automatique limité par impulsions. Le firmware
+arrête les lectures LiDAR pendant le mouvement ; la carte est donc mise à jour
+après chaque arrêt, lorsque le capteur a produit un scan frais. Le mode direct
+est prêt à être essayé sur le robot, mais ses déplacements réels n'ont pas été
+validés lors de la création de ce dépôt. Les sous-cartes du rejeu ne constituent
+pas une carte globale certifiée de toute la salle.

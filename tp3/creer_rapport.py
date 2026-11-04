@@ -206,6 +206,53 @@ Les CSV, JSON, figures et cartes exportées sont dans \texttt{tp3/resultats/}.
 \end{document}
 """
 
+bonus_file = ROOT / "bonus_robot" / "resultats_rejeu" / "bilan_rejeu.json"
+if bonus_file.is_file():
+    bonus = json.loads(bonus_file.read_text(encoding="utf-8"))
+    kept = sum(part["accepted"] for part in bonus["submaps"])
+    bonus_section = r"""
+\section{Bonus : acquisitions avec le robot mobile}
+Le robot ESP32 a permis l'acquisition de @@MOBILE_TOTAL@@ scans distincts lors de
+déplacements commandés par l'utilisateur. Le plus récent export cumulatif
+comprend 114 scans ; quatre CSV individuels plus tardifs ont été ajoutés et un
+doublon exact a été retiré. Les exports cumulatifs précédents contiennent les
+mêmes premiers scans et ne sont donc pas additionnés. La hauteur du capteur et
+les poses réelles du robot n'ont pas été relevées dans ces fichiers.
+
+Le firmware suspend la lecture du LiDAR pendant une impulsion moteur. Un scan
+renvoyé par le serveur pendant ce mouvement peut donc être ancien. Le programme
+bonus applique une boucle arrêt, scan frais, localisation ICP locale, mise à jour
+de la grille, puis courte impulsion de mouvement. Il vérifie le dégagement frontal
+et arrête le robot si le scan est absent, si le recalage échoue ou si un obstacle
+est trop proche. Le pilotage automatique est disponible dans le code mais n'a
+pas été exécuté sur le robot physique dans cette étude ; seul le rejeu des CSV
+et les tests avec un faux robot ont été réalisés.
+
+Le rejeu accepte @@MOBILE_ACCEPTED@@ scans dans @@MOBILE_SUBMAPS@@ sous-cartes.
+Celles-ci possèdent des repères locaux indépendants : les pertes de localisation
+interdisent de les superposer comme si leurs poses relatives étaient connues.
+Les champs \texttt{pose\_x}, \texttt{pose\_y} et \texttt{pose\_angle\_deg} sont
+renseignés manuellement par la route \texttt{/pose} du firmware ; ils ne sont pas
+une vérité terrain et n'ont pas été employés pour le recalage.
+\begin{figure}[H]\centering
+\includegraphics[width=.95\linewidth,height=.67\textheight,keepaspectratio]{../bonus_robot/resultats_rejeu/vue_sous_cartes.png}
+\caption{Sous-cartes calculées à partir du déplacement du robot. Chaque panneau
+possède son propre repère ; le blanc signifie non observé, le vert libre et le
+brun occupé. Leur assemblage global reste à valider.}
+\end{figure}
+\begin{figure}[H]\centering
+\includegraphics[width=.86\linewidth]{../bonus_robot/resultats_rejeu/sous_carte_07/slam_mobile.png}
+\caption{Séquence locale la plus longue : grille et trajectoire estimée dans
+la sous-carte 07. Aucune erreur absolue ne peut être calculée sans mesures de
+position indépendantes.}
+\end{figure}
+
+"""
+    bonus_section = (bonus_section.replace("@@MOBILE_TOTAL@@", str(bonus["source_scans"]))
+                     .replace("@@MOBILE_ACCEPTED@@", str(kept))
+                     .replace("@@MOBILE_SUBMAPS@@", str(len(bonus["submaps"]))))
+    template = template.replace(r"\section{Reproduction}", bonus_section + r"\section{Reproduction}")
+
 replacements = {
     "@@TOTAL@@": str(DATA["total"]),
     "@@ACCEPTED@@": str(DATA["accepted"]),

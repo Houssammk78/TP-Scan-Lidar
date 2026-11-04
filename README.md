@@ -40,6 +40,8 @@ corriger les poses et exporter le plan PNG et les points fusionnés.
 - [Guide et limites](tp3/README.md).
 - [Carte finale](tp3/resultats/carte_finale.png) et [progression](tp3/resultats/progression.png).
 - [Grille, segments, poses et diagnostic](tp3/resultats).
+- [Bonus robot mobile : code, CSV acquis et sous-cartes](tp3/bonus_robot/README.md),
+  avec [vue des sous-cartes](tp3/bonus_robot/resultats_rejeu/vue_sous_cartes.png).
 
 ## Installation et tests
 
@@ -50,6 +52,7 @@ python -m pip install -r tp1/LD06_Atelier/requirements.txt
 python -m unittest discover -s tp1/LD06_Atelier -p "test_*.py" -v
 python -m unittest discover -s tp2 -p "test_*.py" -v
 python -m unittest discover -s tp3 -p "test_*.py" -v
+python -m unittest discover -s tp3/bonus_robot -p "test_*.py" -v
 python tp3/slam.py
 python tp2/evaluer.py
 python tp2/evaluer_nouveaux_scans.py

@@ -1,0 +1,15 @@
+{
+  "scans_total": 8,
+  "scans_accepted": 6,
+  "scans_rejected": 2,
+  "occupied_cells": 366,
+  "free_cells": 4823,
+  "ground_truth_available": false,
+  "embedded_pose_used": false,
+  "map_extent_m": [
+    -9.000000000000002,
+    4.499999999999998,
+    -10.3,
+    6.0
+  ]
+}

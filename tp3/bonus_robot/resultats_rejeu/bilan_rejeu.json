@@ -1,0 +1,98 @@
+{
+  "source_scans": 117,
+  "submaps": [
+    {
+      "folder": "sous_carte_01",
+      "first": "R001",
+      "last": "R014",
+      "scans": 14,
+      "accepted": 12
+    },
+    {
+      "folder": "sous_carte_02",
+      "first": "R015",
+      "last": "R018",
+      "scans": 3,
+      "accepted": 1
+    },
+    {
+      "folder": "sous_carte_03",
+      "first": "R019",
+      "last": "R035",
+      "scans": 17,
+      "accepted": 13
+    },
+    {
+      "folder": "sous_carte_04",
+      "first": "R036",
+      "last": "R043",
+      "scans": 8,
+      "accepted": 6
+    },
+    {
+      "folder": "sous_carte_05",
+      "first": "R044",
+      "last": "R049",
+      "scans": 6,
+      "accepted": 4
+    },
+    {
+      "folder": "sous_carte_06",
+      "first": "R050",
+      "last": "R066",
+      "scans": 17,
+      "accepted": 15
+    },
+    {
+      "folder": "sous_carte_07",
+      "first": "R067",
+      "last": "R097",
+      "scans": 31,
+      "accepted": 25
+    },
+    {
+      "folder": "sous_carte_08",
+      "first": "R098",
+      "last": "R101",
+      "scans": 4,
+      "accepted": 2
+    },
+    {
+      "folder": "sous_carte_09",
+      "first": "R102",
+      "last": "R104",
+      "scans": 3,
+      "accepted": 1
+    },
+    {
+      "folder": "sous_carte_10",
+      "first": "R105",
+      "last": "R109",
+      "scans": 5,
+      "accepted": 3
+    },
+    {
+      "folder": "sous_carte_11",
+      "first": "R110",
+      "last": "R113",
+      "scans": 4,
+      "accepted": 2
+    },
+    {
+      "folder": "sous_carte_12",
+      "first": "R114",
+      "last": "scan_20261104_164632",
+      "scans": 3,
+      "accepted": 1
+    },
+    {
+      "folder": "sous_carte_13",
+      "first": "scan_20261104_164926",
+      "last": "scan_20261104_165007",
+      "scans": 2,
+      "accepted": 1
+    }
+  ],
+  "note": "Repères locaux indépendants. Aucune pose relative fiable entre sous-cartes.",
+  "ground_truth_available": false
+}
