@@ -113,7 +113,7 @@ def run(out=ROOT / "resultats_rejeu"):
         plausible = row["visual_status"] == "plausible"
         ax.scatter(points[:, 0], points[:, 1], s=5 if plausible else 3,
                    color=palette(index), alpha=.55 if plausible else .18,
-                   label=f"{index + 1:02d} {name} {'✓' if plausible else '?'}")
+                   label=f"{index + 1:02d} {name}")
         if plausible:
             ax.annotate(str(index + 1), (row["x_m"], row["y_m"]), fontsize=7,
                         color=palette(index), weight="bold")
