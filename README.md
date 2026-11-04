@@ -35,6 +35,7 @@ corriger les poses et exporter le plan PNG et les points fusionnés.
 
 ## TP3 : intégration SLAM et carte de la salle
 
+- [Partie SLAM illustrée](tp3/SLAM.md).
 - [Rapport PDF](tp3/rapport/rapport_tp3.pdf) et [source LaTeX](tp3/rapport/rapport_tp3.tex).
 - [Guide et limites](tp3/README.md).
 - [Carte finale](tp3/resultats/carte_finale.png) et [progression](tp3/resultats/progression.png).

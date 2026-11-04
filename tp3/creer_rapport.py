@@ -120,6 +120,25 @@ rayon nouveau. Un rejeu de deux scans réels vérifie que les cartes et les
 exports sont produits sans lecture des poses sauvegardées. Ces tests ne
 remplacent pas une mesure indépendante dans la salle.
 
+\section{Partie SLAM illustrée}
+La figure suivante montre un exemple du cycle localisation puis cartographie.
+Le scan 3 arrive dans son repère local alors que la carte ne contient que le
+scan 1 : le scan 2 a été écarté par le contrôle de qualité. Après recalage,
+les murs communs du scan 3 se superposent à ceux de la carte. Les segments
+verts sont un échantillon de correspondances à moins de 20 cm.
+\begin{figure}[H]\centering
+\includegraphics[width=.98\linewidth]{slam_recalage_scan3.png}
+\caption{Localisation du scan 3 avant son insertion dans la carte. La pose
+estimée est calculée depuis les scans, sans référence terrain mesurée.}
+\end{figure}
+La carte s'enrichit après chaque scan accepté. Les quatre panneaux montrent
+le nuage global après 1, 3, 6 puis 9 scans, avec une couleur par acquisition.
+\begin{figure}[H]\centering
+\includegraphics[width=.83\linewidth]{slam_progression_nuages.png}
+\caption{Progression de la fusion incrémentale des points LiDAR. Le scan 2
+n'apparaît pas dans la carte contrôlée parce que son score dépasse le seuil.}
+\end{figure}
+
 \section{Résultats calculés}
 @@ACCEPTED@@ scans sur @@TOTAL@@ ont été ajoutés, soit @@POINTS@@ points
 valides insérés. La carte vectorielle exportée contient @@SEGMENTS@@ segments.
@@ -178,6 +197,7 @@ Depuis la racine du dépôt :
 \begin{verbatim}
 python -m pip install -r tp1/LD06_Atelier/requirements.txt
 python tp3/slam.py
+python tp3/generer_figures_slam.py
 python tp3/creer_rapport.py
 python -m unittest discover -s tp3 -p "test_*.py" -v
 \end{verbatim}

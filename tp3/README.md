@@ -17,6 +17,7 @@ Depuis la racine du dépôt :
 ```powershell
 python -m pip install -r tp1/LD06_Atelier/requirements.txt
 python tp3/slam.py
+python tp3/generer_figures_slam.py
 python tp3/creer_rapport.py
 python -m unittest discover -s tp3 -p "test_*.py" -v
 ```
@@ -39,6 +40,9 @@ livrés sont le [PDF](rapport/rapport_tp3.pdf) et la
 
 ## Résultats
 
+- [Partie SLAM illustrée](SLAM.md) : méthode et figures de recalage et progression.
+- [Recalage d'un scan](resultats/slam_recalage_scan3.png) et
+  [progression des nuages](resultats/slam_progression_nuages.png).
 - [Carte finale](resultats/carte_finale.png) : grille, points, segments et poses.
 - [Carte exploratoire](resultats/carte_exploratoire.png) : ajoute aussi le scan
   refusé par le contrôle de qualité ; elle reste provisoire.
