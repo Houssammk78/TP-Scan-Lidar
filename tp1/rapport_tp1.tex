@@ -85,6 +85,7 @@ Pour une pose $\mathbf{q}=(x_r,y_r,\theta_r)$, un point local est placé dans la
  \mathbf p_g=\underbrace{\begin{bmatrix}\cos\theta_r&-\sin\theta_r\\\sin\theta_r&\cos\theta_r\end{bmatrix}}_{R(\theta_r)}\mathbf p_l+\begin{bmatrix}x_r\\y_r\end{bmatrix}.
 \]
 Le viewer affiche les quatre nuages avec quatre couleurs. Le choix d'un scan active ses curseurs $X$, $Y$ et $\theta$ ; sa pose peut ainsi être ajustée sans déplacer les autres scans. Les poses se sauvegardent dans un fichier JSON. Les cartes sont reconstruites depuis les sources lorsqu'un curseur change pour éviter de conserver des traces d'une ancienne pose.
+Cette visualisation est la première vérification du traitement : deux acquisitions qui voient le même mur doivent dessiner des lignes proches après transformation. Une séparation persistante entre ces lignes peut venir d'une mauvaise pose, d'une surface observée différemment ou d'un obstacle mobile. Le graphique sert donc à diagnostiquer le recalage avant de construire les cartes ; il ne fournit pas, à lui seul, la pose vraie du LiDAR.
 
 \subsection{Recalage estimé des quatre acquisitions}
 Le scan 3 définit l'origine du repère global. Une recherche multi-départs initialise un ICP robuste : 36 rotations espacées de $10^\circ$, neuf décalages de translation par rotation, puis raffinement des meilleurs candidats. À chaque itération, 65\,\% des correspondances les plus proches servent à estimer une rotation et une translation par SVD. Le choix final utilise une distance symétrique plafonnée à 0,40 m.
@@ -201,6 +202,10 @@ Le mode général permet de découper les anciens segments traversés par de nou
 \includegraphics[width=.93\linewidth,height=.75\textheight,keepaspectratio]{carte_vectorielle.png}
 \caption{Carte vectorielle fusionnée : mesures grises, segments bleus, intersections orange et origines estimées rouges.}
 \end{figure}
+
+\subsection{Lecture croisée des résultats}
+Les trois figures finales répondent à des questions différentes. La fusion des nuages montre où les impacts ont été mesurés ; la grid map ajoute l'information sur les cellules effectivement traversées par les rayons ; la carte vectorielle résume les alignements suffisamment droits par des segments. Une zone blanche ou inconnue sur la grille ne devient pas libre parce qu'aucun point n'y apparaît dans le nuage. Inversement, un segment peut représenter plusieurs impacts proches sans indiquer l'épaisseur réelle d'un mur.
+Le scan 4 se superpose fortement au scan 3 selon le critère de voisinage du tableau, tandis que le scan 2 se recale moins bien. Ainsi, les détails supplémentaires apportés par le scan 2 doivent être examinés avec prudence dans les deux cartes. Les 38 segments consolidés décrivent les structures détectées à la hauteur du capteur, pas un plan architectural certifié de la salle.
 
 \section{Validation, fichiers livrés et limites}
 Les 21 tests automatiques vérifient la géométrie, les cas limites de découpage, le tracé des rayons dans plusieurs directions, les conflits d'occupation, les indices négatifs, le rechargement d'une grille, la sélection des scans, les curseurs et les exports du viewer. Les callbacks sont testés sans fenêtre : cela ne remplace pas le contrôle visuel sur le poste de présentation.

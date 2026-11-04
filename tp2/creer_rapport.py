@@ -553,6 +553,18 @@ par méthode, puis erreurs moyennes en position et en orientation sur
 \caption{Exemple des trois méthodes depuis le même départ.}
 \end{figure}
 
+\subsection{Comment lire la comparaison}
+Le taux de réussite et l'erreur moyenne ne disent pas la même chose : un essai
+peut être déclaré réussi tout en gardant plusieurs centimètres ou une fraction
+de degré d'écart. Dans cette simulation, les taux atteignent tous le plafond ;
+les erreurs et les temps du tableau permettent alors de distinguer les
+méthodes. La grille discrétise l'espace et fournit une recherche rapide. Les
+segments représentent directement les surfaces droites mais demandent plus
+de calcul pour évaluer les distances. Le recalage entre scans conserve plus
+de détail géométrique, au prix d'une dépendance au recouvrement et à la bonne
+initialisation de l'ICP. Ces compromis valent pour les données et le matériel
+de calcul testés ici, sans constituer un classement universel.
+
 \section{Estimations sur les acquisitions réelles}
 Les trois références sont construites sur A\_01 et les cinq autres tours
 A/B servent de tests. Pour A\_02 et A\_03, une pose proche de l'origine

@@ -180,6 +180,23 @@ rouges montrent les poses estimées.}
 segments sont provisoires, faute de validation indépendante du recalage.}
 \end{figure}
 
+\subsection{Lecture des deux cartes finales}
+La carte contrôlée et la carte exploratoire sont présentées séparément pour
+montrer l'effet concret du seuil d'acceptation. La première privilégie la
+cohérence des surfaces déjà observées : elle conserve les scans dont le
+recalage satisfait les critères annoncés. La seconde montre la couverture
+que pourrait apporter le scan écarté, mais aussi le risque d'insérer des
+obstacles à une pose erronée. Les lignes vectorielles donnent une lecture
+compacte des structures droites ; la grid map indique en plus les espaces
+traversés et les zones non observées. Une carte visuellement plus remplie
+n'est donc pas automatiquement une carte plus exacte.
+Le rejeu illustre une chaîne de SLAM incrémental sur données enregistrées :
+la carte change après chaque scan accepté et la localisation suivante dépend
+de cette nouvelle carte. L'ordre des acquisitions et les décisions de rejet
+ont ainsi un effet sur le résultat final. Sans retour sur une zone connue
+pour corriger les poses passées, une erreur locale peut se propager aux scans
+ultérieurs ; les figures doivent être interprétées avec cette limite.
+
 \section{Limites et suite du travail}
 Les scans n'ont pas de poses terrain ni d'incertitudes de position et d'angle
 mesurées indépendamment. On ne peut donc calculer ni erreur physique de la
